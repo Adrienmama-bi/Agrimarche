@@ -1,0 +1,119 @@
+{% extends 'base_auth.html' %}
+{% load static %}
+{% block title %}Missions disponibles — AgriMarché{% endblock %}
+
+{% block content %}
+<div class="dash-shell">
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <svg width="30" height="30" viewBox="0 0 36 36" fill="none">
+        <circle cx="18" cy="18" r="18" fill="#0B1F0E"/>
+        <path d="M18 6 C10 10 8 20 12 28 C14 24 16 20 18 18 C20 20 22 24 24 28 C28 20 26 10 18 6Z" fill="#7AE600"/>
+        <line x1="18" y1="8" x2="18" y2="27" stroke="#0B1F0E" stroke-width="1.2" stroke-linecap="round"/>
+        <line x1="18" y1="13" x2="13" y2="17" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+        <line x1="18" y1="17" x2="13" y2="21" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+        <line x1="18" y1="13" x2="23" y2="17" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+        <line x1="18" y1="17" x2="23" y2="21" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+      </svg>
+      <span class="sidebar-brand-text">Agri<span>Marché</span></span>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="sidebar-user-avatar" style="background:var(--transporteur);">
+        {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
+      </div>
+      <div class="sidebar-user-name">{{ request.user.get_full_name }}</div>
+      <span class="sidebar-user-role role-badge-transporteur">Transporteur</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <span class="sidebar-section-label">Principal</span>
+      <a href="{% url 'dashboard_transporteur' %}" class="sidebar-link">
+        <span class="icon">🏠</span> Tableau de bord
+      </a>
+      <a href="{% url 'missions_disponibles' %}" class="sidebar-link is-active">
+        <span class="icon">📋</span> Missions disponibles
+        {% if missions.count %}<span class="badge">{{ missions.count }}</span>{% endif %}
+      </a>
+      <a href="{% url 'mes_livraisons' %}" class="sidebar-link">
+        <span class="icon">🚚</span> Mes livraisons
+      </a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <a href="{% url 'deconnexion' %}" class="sidebar-logout">
+        <span class="icon">🚪</span> Déconnexion
+      </a>
+    </div>
+  </aside>
+
+  <div class="dash-main">
+
+    <div class="dash-topbar">
+      <div>
+        <div class="dash-topbar-title">Missions disponibles</div>
+        <div style="font-size:12px; color:var(--ink-faint); margin-top:2px;">
+          {{ missions.count }} mission{% if missions.count > 1 %}s{% endif %} en attente d'un transporteur
+        </div>
+      </div>
+    </div>
+
+    <div class="dash-body">
+
+      {% if missions %}
+      <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(320px,1fr)); gap:var(--sp-5);">
+        {% for mission in missions %}
+        <div class="dash-card" style="padding:var(--sp-5);">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:var(--sp-4);">
+            <span style="font-family:var(--font-mono); font-size:11px; color:var(--ink-faint);">Mission #{{ mission.pk }}</span>
+            <span class="status-badge status-attente">En attente</span>
+          </div>
+
+          <!-- TRAJET -->
+          <div style="display:flex; align-items:center; gap:var(--sp-2); margin-bottom:var(--sp-4);">
+            <div style="flex:1;">
+              <div style="font-size:10px; font-family:var(--font-mono); color:var(--ink-faint); text-transform:uppercase;">Départ</div>
+              <div style="font-weight:600; font-size:13px;">🌾 {{ mission.commande.agriculteur.localisation|default:"Non précisé" }}</div>
+            </div>
+            <div style="color:var(--lemon-dark); font-size:18px;">→</div>
+            <div style="flex:1;">
+              <div style="font-size:10px; font-family:var(--font-mono); color:var(--ink-faint); text-transform:uppercase;">Arrivée</div>
+              <div style="font-weight:600; font-size:13px;">📍 {{ mission.commande.adresse_livraison }}</div>
+            </div>
+          </div>
+
+          <div style="background:var(--bg-soft); border-radius:var(--r-md); padding:var(--sp-3) var(--sp-4); margin-bottom:var(--sp-4); font-size:13px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+              <span style="color:var(--ink-faint);">Agriculteur</span>
+              <span style="font-weight:600;">{{ mission.commande.agriculteur.utilisateur.get_full_name }}</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+              <span style="color:var(--ink-faint);">Acheteur</span>
+              <span style="font-weight:600;">{{ mission.commande.acheteur.utilisateur.get_full_name }}</span>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+              <span style="color:var(--ink-faint);">Valeur commande</span>
+              <span style="font-family:var(--font-mono); font-weight:700;">{{ mission.commande.montant_total }} CDF</span>
+            </div>
+          </div>
+
+          <a href="{% url 'accepter_mission' mission.pk %}" class="btn btn-lemon btn-block">
+            Accepter cette mission →
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+
+      {% else %}
+      <div style="text-align:center; padding:var(--sp-10) var(--sp-5);">
+        <div style="font-size:64px; margin-bottom:var(--sp-5);">📋</div>
+        <h2 style="font-size:24px; margin-bottom:var(--sp-3);">Aucune mission disponible</h2>
+        <p style="color:var(--ink-soft);">Revenez plus tard, de nouvelles missions apparaîtront dès qu'une commande sera validée.</p>
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+{% endblock %}

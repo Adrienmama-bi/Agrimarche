@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Confirmer le paiement — AgriMarché{% endblock %}
+
+{% block content %}
+<section style="padding:var(--sp-7) 0; background:var(--bg-soft); min-height:80vh; display:flex; align-items:center;">
+  <div class="container" style="max-width:480px;">
+
+    <div style="background:var(--white); border-radius:var(--r-lg); padding:var(--sp-7); box-shadow:var(--shadow-md); text-align:center;">
+
+      {% if paiement.methode == 'mobile_money' %}
+      <div style="font-size:56px; margin-bottom:var(--sp-4);">📱</div>
+      <h1 style="font-size:22px; margin-bottom:var(--sp-3);">Confirmez sur votre téléphone</h1>
+      <p style="color:var(--ink-soft); font-size:14px; margin-bottom:var(--sp-6);">
+        Une demande de paiement de <strong>{{ paiement.montant }} CDF</strong> a été envoyée.
+        Validez la transaction depuis votre application Mobile Money.
+      </p>
+      {% elif paiement.methode == 'carte' %}
+      <div style="font-size:56px; margin-bottom:var(--sp-4);">💳</div>
+      <h1 style="font-size:22px; margin-bottom:var(--sp-3);">Paiement par carte</h1>
+      <p style="color:var(--ink-soft); font-size:14px; margin-bottom:var(--sp-6);">
+        Montant à débiter : <strong>{{ paiement.montant }} CDF</strong>
+      </p>
+      {% else %}
+      <div style="font-size:56px; margin-bottom:var(--sp-4);">💵</div>
+      <h1 style="font-size:22px; margin-bottom:var(--sp-3);">Paiement à la livraison</h1>
+      <p style="color:var(--ink-soft); font-size:14px; margin-bottom:var(--sp-6);">
+        Vous paierez <strong>{{ paiement.montant }} CDF</strong> en espèces au transporteur.
+      </p>
+      {% endif %}
+
+      <div style="background:var(--bg-soft); border-radius:var(--r-md); padding:var(--sp-3) var(--sp-4); margin-bottom:var(--sp-6); font-family:var(--font-mono); font-size:12px; color:var(--ink-faint);">
+        Référence : {{ paiement.reference_externe }}
+      </div>
+
+      <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-lemon btn-block btn-lg">
+          ✓ Confirmer le paiement
+        </button>
+      </form>
+
+      <p style="font-size:11px; color:var(--ink-faint); margin-top:var(--sp-4);">
+        (Démo : ce bouton simule la confirmation reçue de la passerelle de paiement)
+      </p>
+
+    </div>
+  </div>
+</section>
+{% endblock %}

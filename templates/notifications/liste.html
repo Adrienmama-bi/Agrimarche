@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Notifications — AgriMarché{% endblock %}
+
+{% block content %}
+<section style="padding:var(--sp-7) 0; min-height:70vh;">
+  <div class="container" style="max-width:680px;">
+
+    <h1 style="font-size:26px; margin-bottom:var(--sp-6);">🔔 Notifications</h1>
+
+    {% if notifications %}
+    <div class="dash-card">
+      {% for notif in notifications %}
+      <a href="{% url 'aller_vers_notification' notif.pk %}" style="display:flex; align-items:flex-start; gap:var(--sp-4); padding:var(--sp-4) var(--sp-5); border-bottom:1px solid var(--line); text-decoration:none; {% if not notif.est_lue %}background:var(--lemon-soft);{% endif %}">
+        <div style="width:38px; height:38px; border-radius:50%; background:{% if notif.type_notif == 'commande' %}var(--acheteur-soft){% elif notif.type_notif == 'paiement' %}var(--lemon-soft){% elif notif.type_notif == 'livraison' %}var(--transporteur-soft){% else %}var(--agriculteur-soft){% endif %}; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0;">
+          {% if notif.type_notif == 'commande' %}📦{% elif notif.type_notif == 'paiement' %}💳{% elif notif.type_notif == 'livraison' %}🚚{% else %}🔔{% endif %}
+        </div>
+        <div style="flex:1;">
+          <div style="font-weight:700; font-size:14px; color:var(--ink);">{{ notif.titre }}</div>
+          <div style="font-size:13px; color:var(--ink-soft); margin-top:2px;">{{ notif.contenu }}</div>
+          <div style="font-size:11px; color:var(--ink-faint); margin-top:6px; font-family:var(--font-mono);">{{ notif.date_envoi|date:"d/m/Y à H:i" }}</div>
+        </div>
+        {% if not notif.est_lue %}
+        <div style="width:8px; height:8px; background:var(--lemon-dark); border-radius:50%; margin-top:6px; flex-shrink:0;"></div>
+        {% endif %}
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div style="text-align:center; padding:var(--sp-10) var(--sp-5);">
+      <div style="font-size:64px; margin-bottom:var(--sp-5);">🔔</div>
+      <h2 style="font-size:22px; margin-bottom:var(--sp-3);">Aucune notification</h2>
+      <p style="color:var(--ink-soft);">Vous serez averti ici de toute activité sur vos commandes.</p>
+    </div>
+    {% endif %}
+
+  </div>
+</section>
+{% endblock %}

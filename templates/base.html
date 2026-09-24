@@ -1,0 +1,116 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}AgriMarché — Du champ à votre porte{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/main.css' %}">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<header class="nav">
+  <div class="nav-inner">
+
+    <!-- LOGO -->
+    <a href="{% url 'accueil' %}" class="nav-brand">
+      <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="18" cy="18" r="18" fill="#0B1F0E"/>
+        <!-- Feuille principale -->
+        <path d="M18 6 C10 10 8 20 12 28 C14 24 16 20 18 18 C20 20 22 24 24 28 C28 20 26 10 18 6Z" fill="#7AE600"/>
+        <!-- Nervure centrale -->
+        <line x1="18" y1="8" x2="18" y2="27" stroke="#0B1F0E" stroke-width="1.2" stroke-linecap="round"/>
+        <!-- Nervures gauches -->
+        <line x1="18" y1="13" x2="13" y2="17" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+        <line x1="18" y1="17" x2="13" y2="21" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+        <line x1="18" y1="21" x2="14" y2="24" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+        <!-- Nervures droites -->
+        <line x1="18" y1="13" x2="23" y2="17" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+        <line x1="18" y1="17" x2="23" y2="21" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+        <line x1="18" y1="21" x2="22" y2="24" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+      </svg>
+      <span class="nav-brand-text">Agri<span class="nav-brand-accent">Marché</span></span>
+    </a>
+
+    <nav class="nav-links">
+      <a href="{% url 'accueil' %}">Accueil</a>
+      <a href="{% url 'catalogue' %}">Produits</a>
+      <a href="{% url 'accueil' %}#comment-ca-marche">Comment ça marche</a>
+    </nav>
+
+    <div class="nav-actions">
+      {% if user.is_authenticated %}
+        <a href="{% url 'dashboard' %}" class="btn btn-ghost">Mon espace</a>
+        <a href="{% url 'deconnexion' %}" class="btn btn-lemon">Déconnexion</a>
+      {% else %}
+        <a href="{% url 'connexion' %}" class="btn btn-ghost">Connexion</a>
+        <a href="{% url 'inscription' %}" class="btn btn-lemon">Créer un compte</a>
+      {% endif %}
+    </div>
+    <button class="nav-toggle" aria-label="Menu">☰</button>
+  </div>
+</header>
+
+{% include 'partials/_messages.html' %}
+
+<main>{% block content %}{% endblock %}</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <svg width="44" height="44" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="18" cy="18" r="18" fill="#7AE600"/>
+          <path d="M18 6 C10 10 8 20 12 28 C14 24 16 20 18 18 C20 20 22 24 24 28 C28 20 26 10 18 6Z" fill="#0B1F0E"/>
+          <line x1="18" y1="8" x2="18" y2="27" stroke="#7AE600" stroke-width="1.2" stroke-linecap="round"/>
+          <line x1="18" y1="13" x2="13" y2="17" stroke="#7AE600" stroke-width="0.8" stroke-linecap="round"/>
+          <line x1="18" y1="17" x2="13" y2="21" stroke="#7AE600" stroke-width="0.8" stroke-linecap="round"/>
+          <line x1="18" y1="21" x2="14" y2="24" stroke="#7AE600" stroke-width="0.8" stroke-linecap="round"/>
+          <line x1="18" y1="13" x2="23" y2="17" stroke="#7AE600" stroke-width="0.8" stroke-linecap="round"/>
+          <line x1="18" y1="17" x2="23" y2="21" stroke="#7AE600" stroke-width="0.8" stroke-linecap="round"/>
+          <line x1="18" y1="21" x2="22" y2="24" stroke="#7AE600" stroke-width="0.8" stroke-linecap="round"/>
+        </svg>
+        <span class="footer-brand-name">Agri<span>Marché</span></span>
+        <p>Connecter les agriculteurs, acheteurs et transporteurs sur une seule plateforme — de la récolte à votre porte.</p>
+      </div>
+      <div class="footer-links">
+        <div class="footer-col">
+          <h4>Plateforme</h4>
+          <ul>
+            <li><a href="{% url 'accueil' %}">Accueil</a></li>
+            <li><a href="{% url 'catalogue' %}#produits">Produits</a></li>
+            <li><a href="{% url 'accueil' %}#comment-ca-marche">Comment ça marche</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Rejoindre</h4>
+          <ul>
+            <li><a href="{% url 'inscription' %}?role=agriculteur">Agriculteurs</a></li>
+            <li><a href="{% url 'inscription' %}?role=acheteur">Acheteurs</a></li>
+            <li><a href="{% url 'inscription' %}?role=transporteur">Transporteurs</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Entreprise</h4>
+          <ul>
+            <li><a href="#">À propos</a></li>
+            <li><a href="#">Contact</a></li>
+            <li><a href="#">Mentions légales</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© {% now "Y" %} AgriMarché — Tous droits réservés.</span>
+      <span class="mono" style="color:var(--lemon); font-size:12px;">FAIT AU CMR 🌿</span>
+    </div>
+  </div>
+</footer>
+
+<script src="{% static 'js/main.js' %}"></script>
+{% include 'partials/_chatbot.html' %}
+</body>
+</html>

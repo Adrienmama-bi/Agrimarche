@@ -1,0 +1,309 @@
+{% extends 'base_auth.html' %}
+{% load static %}
+{% block title %}Produits proches — AgriMarché{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+#carte-proches { height: 350px; border-radius: var(--r-lg); overflow: hidden; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dash-shell">
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <svg width="30" height="30" viewBox="0 0 36 36" fill="none">
+        <circle cx="18" cy="18" r="18" fill="#0B1F0E"/>
+        <path d="M18 6 C10 10 8 20 12 28 C14 24 16 20 18 18 C20 20 22 24 24 28 C28 20 26 10 18 6Z" fill="#7AE600"/>
+        <line x1="18" y1="8" x2="18" y2="27" stroke="#0B1F0E" stroke-width="1.2" stroke-linecap="round"/>
+      </svg>
+      <span class="sidebar-brand-text">Agri<span>Marché</span></span>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="sidebar-user-avatar" style="background:var(--acheteur);">
+        {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
+      </div>
+      <div class="sidebar-user-name">{{ request.user.get_full_name }}</div>
+      <span class="sidebar-user-role role-badge-acheteur">Acheteur</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <span class="sidebar-section-label">Principal</span>
+      <a href="{% url 'dashboard_acheteur' %}" class="sidebar-link">
+        <span class="icon">🏠</span> Tableau de bord
+      </a>
+      <a href="{% url 'catalogue' %}" class="sidebar-link">
+        <span class="icon">🛒</span> Catalogue
+      </a>
+      <a href="{% url 'mes_commandes' %}" class="sidebar-link">
+        <span class="icon">📦</span> Mes commandes
+      </a>
+      <a href="{% url 'carte_catalogue' %}" class="sidebar-link">
+        <span class="icon">🗺️</span> Carte des produits
+      </a>
+      <a href="{% url 'produits_proches' %}" class="sidebar-link is-active">
+        <span class="icon">📍</span> Produits proches
+      </a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <a href="{% url 'deconnexion' %}" class="sidebar-logout">
+        <span class="icon">🚪</span> Déconnexion
+      </a>
+    </div>
+  </aside>
+
+  <div class="dash-main">
+    <div class="dash-topbar">
+      <div>
+        <div class="dash-topbar-title">📍 Produits proches de moi</div>
+        <div style="font-size:12px; color:var(--ink-faint); margin-top:2px;">
+          Produits disponibles dans un rayon de {{ rayon }} km
+        </div>
+      </div>
+      <button onclick="activerGPS()" class="btn btn-lemon" style="padding:10px 20px; font-size:13px;">
+        📍 Actualiser ma position
+      </button>
+    </div>
+
+    <div class="dash-body">
+
+      {% if not position_connue %}
+      <!-- Pas de position -->
+      <div style="text-align:center; padding:var(--sp-10);">
+        <div style="font-size:72px; margin-bottom:var(--sp-5);">📍</div>
+        <h2 style="font-size:24px; margin-bottom:var(--sp-3);">Activez votre géolocalisation</h2>
+        <p style="color:var(--ink-soft); max-width:400px; margin:0 auto var(--sp-6);">
+          Pour voir les produits agricoles disponibles près de chez vous,
+          nous avons besoin de votre position. Vos données restent
+          confidentielles et ne sont utilisées que pour ce filtrage.
+        </p>
+        <button onclick="activerGPS()" class="btn btn-lemon btn-lg">
+          📍 Partager ma position
+        </button>
+        <div style="margin-top:var(--sp-4);">
+          <a href="{% url 'catalogue' %}" style="font-size:13px; color:var(--ink-faint);">
+            Voir tout le catalogue sans filtrage géographique →
+          </a>
+        </div>
+      </div>
+
+      {% else %}
+
+      <!-- Filtre rayon -->
+      <div class="dash-card" style="padding:var(--sp-5); margin-bottom:var(--sp-5);">
+        <form method="get" style="display:flex; gap:var(--sp-4); align-items:center; flex-wrap:wrap;">
+          <label style="font-weight:600; font-size:14px;">Rayon de recherche :</label>
+          {% for r in rayons %}
+<a href="?rayon={{ r }}"
+   style="padding:7px 16px; border-radius:var(--r-full); border:1.5px solid {% if rayon == r %}var(--lemon){% else %}var(--line){% endif %}; background:{% if rayon == r %}var(--lemon){% else %}var(--white){% endif %}; color:{% if rayon == r %}var(--soil){% else %}var(--ink-soft){% endif %}; font-weight:600; font-size:13px; text-decoration:none;">
+  {{ r }} km
+</a>
+{% endfor %}
+          <span style="font-size:13px; color:var(--ink-faint); margin-left:auto;">
+            {{ resultats|length }} produit{{ resultats|length|pluralize }} trouvé{{ resultats|length|pluralize }}
+          </span>
+        </form>
+      </div>
+
+      {% if resultats %}
+
+      <!-- Carte -->
+      <div class="dash-card" style="padding:var(--sp-5); margin-bottom:var(--sp-5);">
+        <h3 style="font-size:15px; margin-bottom:var(--sp-4);">Carte des produits proches</h3>
+        <div id="carte-proches"></div>
+      </div>
+
+      <!-- Liste des produits -->
+      <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px,1fr)); gap:var(--sp-4);">
+        {% for item in resultats %}
+        {% with produit=item.produit %}
+        <div class="dash-card" style="overflow:hidden;">
+          <!-- Photo -->
+          <div style="height:160px; background:var(--lemon-soft); position:relative; overflow:hidden;">
+            {% with photo=produit.photos.first %}
+            {% if photo %}
+            <img src="{{ photo.image.url }}" alt="{{ produit.nom }}"
+                 style="width:100%; height:100%; object-fit:cover;">
+            {% else %}
+            <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:48px;">🌿</div>
+            {% endif %}
+            {% endwith %}
+
+            {% if produit.est_bio %}
+            <span style="position:absolute; top:10px; left:10px; background:var(--lemon); color:var(--soil); font-size:9px; font-weight:800; padding:3px 8px; border-radius:20px;">BIO</span>
+            {% endif %}
+
+            {% if item.distance_km %}
+            <span style="position:absolute; top:10px; right:10px; background:var(--soil); color:var(--lemon); font-size:10px; font-weight:700; padding:3px 8px; border-radius:20px;">
+              📍 {{ item.distance_km }} km
+            </span>
+            {% endif %}
+          </div>
+
+          <!-- Contenu -->
+          <div style="padding:var(--sp-4);">
+            <div style="font-size:11px; color:var(--ink-faint); margin-bottom:4px;">
+              🌾 {{ produit.agriculteur.utilisateur.get_full_name }}
+              {% if produit.categorie %}· {{ produit.categorie.icone }} {{ produit.categorie.nom }}{% endif %}
+            </div>
+            <h3 style="font-size:15px; font-weight:700; margin-bottom:var(--sp-2);">{{ produit.nom }}</h3>
+            <p style="font-size:13px; color:var(--ink-soft); margin-bottom:var(--sp-3);">
+              {{ produit.description|truncatechars:80 }}
+            </p>
+
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <div style="font-family:var(--font-mono); font-weight:800; font-size:16px; color:var(--lemon-dark);">
+                  {{ produit.prix_unitaire }} CFA
+                </div>
+                <div style="font-size:11px; color:var(--ink-faint);">/ {{ produit.get_unite_display }}</div>
+              </div>
+              <div style="text-align:right;">
+                {% if item.duree_minutes %}
+                <div style="font-size:11px; color:var(--ink-faint);">⏱️ ~{{ item.duree_minutes }} min</div>
+                {% endif %}
+                <a href="{% url 'detail_produit' produit.pk %}" class="btn btn-lemon" style="padding:8px 16px; font-size:13px; margin-top:4px;">
+                  Commander →
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endwith %}
+        {% endfor %}
+      </div>
+
+      {% else %}
+      <!-- Aucun produit dans ce rayon -->
+      <div style="text-align:center; padding:var(--sp-10);">
+        <div style="font-size:64px; margin-bottom:var(--sp-5);">🔍</div>
+        <h2 style="font-size:22px; margin-bottom:var(--sp-3);">Aucun produit dans {{ rayon }} km</h2>
+        <p style="color:var(--ink-soft); margin-bottom:var(--sp-5);">
+          Essayez d'augmenter le rayon de recherche ou consultez le catalogue complet.
+        </p>
+        <div style="display:flex; gap:var(--sp-3); justify-content:center;">
+          <a href="?rayon=100" class="btn btn-lemon">Élargir à 100 km</a>
+          <a href="{% url 'catalogue' %}" class="btn btn-ghost">Voir tout le catalogue</a>
+        </div>
+      </div>
+      {% endif %}
+
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+
+{% if position_connue and resultats %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const MARKERS = {{ markers_json|safe }};
+const LAT_MOI = {{ lat_acheteur }};
+const LNG_MOI = {{ lng_acheteur }};
+
+const carte = L.map('carte-proches', {
+  center: [LAT_MOI, LNG_MOI],
+  zoom: 11,
+});
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+  maxZoom: 19,
+}).addTo(carte);
+
+// Ma position
+L.marker([LAT_MOI, LNG_MOI], {
+  icon: L.divIcon({
+    className: '',
+    html: <div style="background:#FF5500;width:18px;height:18px;border-radius:50%;border:3px solid white;box-shadow:0 0 0 3px rgba(255,85,0,0.3);"></div>,
+    iconSize: [18, 18],
+    iconAnchor: [9, 9],
+  })
+}).addTo(carte).bindPopup('<strong>📍 Vous êtes ici</strong>');
+
+// Cercle de rayon
+L.circle([LAT_MOI, LNG_MOI], {
+  color: '#FF5500',
+  fillColor: '#FF5500',
+  fillOpacity: 0.04,
+  radius: {{ rayon }} * 1000,
+  weight: 1.5,
+  dashArray: '6, 4',
+}).addTo(carte);
+
+// Marqueurs produits
+const bounds = [[LAT_MOI, LNG_MOI]];
+
+MARKERS.forEach(function(m) {
+  const marker = L.marker([m.lat, m.lng], {
+    icon: L.divIcon({
+      className: '',
+      html: <div style="background:#0B1F0E;color:#7AE600;border:2px solid #7AE600;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 8px rgba(0,0,0,0.3);">🌿</div>,
+      iconSize: [32, 32],
+      iconAnchor: [16, 16],
+      popupAnchor: [0, -18],
+    })
+  }).addTo(carte);
+
+  marker.bindPopup(`
+    <div style="min-width:160px;">
+      <strong style="font-size:14px;">${m.nom}</strong><br>
+      <span style="color:#666;font-size:12px;">${m.prix} CFA / ${m.unite}</span><br>
+      <span style="color:#888;font-size:11px;">📍 ${m.distance} km de vous</span><br>
+      <a href="${m.url}" style="display:block;margin-top:8px;background:#7AE600;color:#0B1F0E;padding:5px 10px;border-radius:6px;text-decoration:none;font-weight:700;font-size:12px;text-align:center;">Voir le produit →</a>
+    </div>
+  `);
+
+  bounds.push([m.lat, m.lng]);
+});
+
+// Ajuster la vue
+carte.fitBounds(bounds, { padding: [40, 40] });
+</script>
+{% endif %}
+
+<script>
+function activerGPS() {
+  if (!navigator.geolocation) {
+    alert('Géolocalisation non disponible sur votre navigateur.');
+    return;
+  }
+
+  const btn = event.target;
+  btn.textContent = '⏳ Localisation...';
+  btn.disabled = true;
+
+  navigator.geolocation.getCurrentPosition(
+    function(pos) {
+      fetch('/assistant/position/maj/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': '{{ csrf_token }}',
+        },
+        body: JSON.stringify({
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+        }),
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (data.ok) {
+          location.reload();
+        }
+      });
+    },
+    function() {
+      alert('Impossible d\'obtenir votre position. Vérifiez les autorisations de votre navigateur.');
+      btn.textContent = '📍 Actualiser ma position';
+      btn.disabled = false;
+    },
+    { enableHighAccuracy: true, timeout: 10000 }
+  );
+}
+</script>
+{% endblock %}

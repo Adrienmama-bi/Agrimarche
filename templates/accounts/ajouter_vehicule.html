@@ -1,0 +1,58 @@
+{% extends 'base_auth.html' %}
+{% load static %}
+{% block title %}Ajouter un véhicule — AgriMarché{% endblock %}
+
+{% block content %}
+<div style="min-height:100vh; display:flex; align-items:center; justify-content:center; background:var(--bg-soft); padding:var(--sp-5);">
+  <div style="background:var(--white); border-radius:var(--r-lg); padding:var(--sp-7); max-width:480px; width:100%; box-shadow:var(--shadow-lg);">
+
+    <a href="{% url 'gestion_vehicules' %}" style="font-size:13px; color:var(--ink-faint); display:inline-block; margin-bottom:var(--sp-5);">← Retour à mes véhicules</a>
+
+    <h2 style="font-size:24px; margin-bottom:var(--sp-6);">Ajouter un véhicule</h2>
+
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      <div class="field">
+        <label>Type de véhicule</label>
+        <select name="type_vehicule" class="input">
+          {% for value, label in form.fields.type_vehicule.choices %}
+          <option value="{{ value }}">{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Immatriculation</label>
+        <input type="text" name="immatriculation" class="input" placeholder="Ex : CD-1234-KN" required>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Capacité (kg)</label>
+          <input type="number" name="capacite_kg" class="input" placeholder="1000" required>
+        </div>
+        <div class="field">
+          <label>Année</label>
+          <input type="number" name="annee" class="input" placeholder="2020" required>
+        </div>
+      </div>
+
+      <label style="display:flex; align-items:center; gap:var(--sp-2); font-size:14px; cursor:pointer; margin-bottom:var(--sp-5);">
+        <input type="checkbox" name="est_refrigere" style="accent-color:var(--lemon); width:16px; height:16px;">
+        <span>❄️ Véhicule réfrigéré (pour produits sensibles)</span>
+      </label>
+
+      <div class="field">
+        <label>Photo du véhicule (optionnel)</label>
+        <input type="file" name="photo" accept="image/*" class="input" style="padding:10px;">
+      </div>
+
+      <button type="submit" class="btn btn-lemon btn-block btn-lg">
+        Enregistrer le véhicule →
+      </button>
+    </form>
+
+  </div>
+</div>
+{% endblock %}

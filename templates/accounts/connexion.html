@@ -1,0 +1,132 @@
+{% extends 'base_auth.html' %}
+{% load static %}
+{% block title %}Connexion — AgriMarché{% endblock %}
+
+{% block content %}
+<div class="auth-shell">
+
+  <!-- CÔTÉ GAUCHE : BRANDING -->
+  <aside class="auth-brand">
+    <div class="auth-brand-top">
+      <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+        <circle cx="18" cy="18" r="18" fill="#7AE600"/>
+        <path d="M18 6 C10 10 8 20 12 28 C14 24 16 20 18 18 C20 20 22 24 24 28 C28 20 26 10 18 6Z" fill="#0B1F0E"/>
+        <line x1="18" y1="8" x2="18" y2="27" stroke="#7AE600" stroke-width="1.2" stroke-linecap="round"/>
+        <line x1="18" y1="13" x2="13" y2="17" stroke="#7AE600" stroke-width="0.8" stroke-linecap="round"/>
+        <line x1="18" y1="17" x2="13" y2="21" stroke="#7AE600" stroke-width="0.8" stroke-linecap="round"/>
+        <line x1="18" y1="13" x2="23" y2="17" stroke="#7AE600" stroke-width="0.8" stroke-linecap="round"/>
+        <line x1="18" y1="17" x2="23" y2="21" stroke="#7AE600" stroke-width="0.8" stroke-linecap="round"/>
+      </svg>
+      <span class="logo-text">Agri<span class="logo-dot-text">Marché</span></span>
+    </div>
+
+    <div class="auth-brand-mid">
+      <h2>Content de vous revoir.</h2>
+      <p>Connectez-vous pour gérer vos annonces, vos commandes ou vos livraisons en temps réel.</p>
+
+      <div style="margin-top: var(--sp-7); display:flex; flex-direction:column; gap:var(--sp-4);">
+        <div style="display:flex; align-items:center; gap:var(--sp-3);">
+          <div style="width:40px; height:40px; border-radius:var(--r-md); background:rgba(122,230,0,0.12); border:1px solid rgba(122,230,0,0.2); display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0;">🌾</div>
+          <div>
+            <div style="font-weight:600; font-size:14px; color:var(--white);">Agriculteurs</div>
+            <div style="font-size:12px; color:rgba(255,255,255,0.45);">Gérez vos annonces et commandes</div>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:var(--sp-3);">
+          <div style="width:40px; height:40px; border-radius:var(--r-md); background:rgba(122,230,0,0.12); border:1px solid rgba(122,230,0,0.2); display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0;">🛒</div>
+          <div>
+            <div style="font-weight:600; font-size:14px; color:var(--white);">Acheteurs</div>
+            <div style="font-size:12px; color:rgba(255,255,255,0.45);">Suivez vos commandes en direct</div>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:var(--sp-3);">
+          <div style="width:40px; height:40px; border-radius:var(--r-md); background:rgba(122,230,0,0.12); border:1px solid rgba(122,230,0,0.2); display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0;">🚛</div>
+          <div>
+            <div style="font-weight:600; font-size:14px; color:var(--white);">Transporteurs</div>
+            <div style="font-size:12px; color:rgba(255,255,255,0.45);">Consultez vos missions du jour</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="auth-brand-stats">
+      <div>
+        <span class="num">1 200+</span>
+        <span class="label">Agriculteurs</span>
+      </div>
+      <div>
+        <span class="num">15 000+</span>
+        <span class="label">Commandes</span>
+      </div>
+      <div>
+        <span class="num">98%</span>
+        <span class="label">À l'heure</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- CÔTÉ DROIT : FORMULAIRE -->
+  <div class="auth-form-side">
+    <div class="auth-form-box">
+      <a href="{% url 'accueil' %}" class="top-link">← Retour à l'accueil</a>
+
+      <div style="margin-bottom: var(--sp-6);">
+        <h1>Se connecter</h1>
+        <p class="sub">Entrez vos identifiants pour accéder à votre espace.</p>
+      </div>
+
+      {% include 'partials/_messages.html' %}
+
+      <form method="post" novalidate>
+        {% csrf_token %}
+
+        <div class="field">
+          <label for="id_username">Nom d'utilisateur</label>
+          <input
+            type="text"
+            name="username"
+            id="id_username"
+            class="input"
+            placeholder="votre_nom_utilisateur"
+            required
+            autofocus>
+        </div>
+
+        <div class="field">
+          <label for="id_password">Mot de passe</label>
+          <div class="password-wrap">
+            <input
+              type="password"
+              name="password"
+              id="id_password"
+              class="input"
+              placeholder="••••••••"
+              required>
+            <button type="button" class="password-toggle" data-toggle-for="id_password">Afficher</button>
+          </div>
+        </div>
+
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:var(--sp-5);">
+          <label style="display:flex; align-items:center; gap:var(--sp-2); font-size:13px; cursor:pointer;">
+            <input type="checkbox" name="remember" style="accent-color:var(--lemon); width:15px; height:15px;">
+            Se souvenir de moi
+          </label>
+          <a href="#" style="font-size:13px; color:var(--lemon-dark); font-weight:600;">Mot de passe oublié ?</a>
+        </div>
+
+        <button type="submit" class="btn btn-lemon btn-block btn-lg">
+          Se connecter →
+        </button>
+      </form>
+
+      <div class="auth-divider">ou</div>
+
+      <p class="auth-switch">
+        Pas encore de compte ?
+        <a href="{% url 'inscription' %}">Créer un compte gratuitement</a>
+      </p>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

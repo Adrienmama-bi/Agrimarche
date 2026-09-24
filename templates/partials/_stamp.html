@@ -1,0 +1,17 @@
+{% with sfx=size|default:"sm" %}
+<svg class="stamp stamp-{{ sfx }}{% if dark %} stamp-on-dark{% endif %}" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <path id="top-{{ sfx }}{% if dark %}-d{% endif %}" d="M 25,100 A 75,75 0 0 1 175,100" />
+    <path id="bot-{{ sfx }}{% if dark %}-d{% endif %}" d="M 175,100 A 75,75 0 0 1 25,100" />
+  </defs>
+  <circle cx="100" cy="100" r="92" stroke="currentColor" stroke-width="2" fill="none"/>
+  <circle cx="100" cy="100" r="78" stroke="currentColor" stroke-width="1" stroke-dasharray="2 5" fill="none"/>
+  <text font-family="IBM Plex Mono, monospace" font-size="13" letter-spacing="3" fill="currentColor">
+    <textPath href="#top-{{ sfx }}{% if dark %}-d{% endif %}" startOffset="50%" text-anchor="middle">AGRIMARCHÉ</textPath>
+  </text>
+  <text font-family="IBM Plex Mono, monospace" font-size="10" letter-spacing="2" fill="currentColor">
+    <textPath href="#bot-{{ sfx }}{% if dark %}-d{% endif %}" startOffset="50%" text-anchor="middle">FRAIS · LOCAL · LIVRÉ</textPath>
+  </text>
+  <text x="100" y="112" font-family="Space Grotesk, sans-serif" font-size="32" font-weight="700" text-anchor="middle" fill="currentColor">AM</text>
+</svg>
+{% endwith %}

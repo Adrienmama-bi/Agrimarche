@@ -1,0 +1,105 @@
+{% extends 'base_auth.html' %}
+{% load static %}
+{% block title %}Mon véhicule — AgriMarché{% endblock %}
+
+{% block content %}
+<div class="dash-shell">
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <svg width="30" height="30" viewBox="0 0 36 36" fill="none">
+        <circle cx="18" cy="18" r="18" fill="#0B1F0E"/>
+        <path d="M18 6 C10 10 8 20 12 28 C14 24 16 20 18 18 C20 20 22 24 24 28 C28 20 26 10 18 6Z" fill="#7AE600"/>
+        <line x1="18" y1="8" x2="18" y2="27" stroke="#0B1F0E" stroke-width="1.2" stroke-linecap="round"/>
+        <line x1="18" y1="13" x2="13" y2="17" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+        <line x1="18" y1="17" x2="13" y2="21" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+        <line x1="18" y1="13" x2="23" y2="17" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+        <line x1="18" y1="17" x2="23" y2="21" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+      </svg>
+      <span class="sidebar-brand-text">Agri<span>Marché</span></span>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="sidebar-user-avatar" style="background:var(--transporteur);">
+        {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
+      </div>
+      <div class="sidebar-user-name">{{ request.user.get_full_name }}</div>
+      <span class="sidebar-user-role role-badge-transporteur">Transporteur</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <span class="sidebar-section-label">Principal</span>
+      <a href="{% url 'dashboard_transporteur' %}" class="sidebar-link">
+        <span class="icon">🏠</span> Tableau de bord
+      </a>
+
+      <span class="sidebar-section-label" style="margin-top:var(--sp-3);">Compte</span>
+      <a href="{% url 'mon_profil' %}" class="sidebar-link">
+        <span class="icon">👤</span> Mon profil
+      </a>
+      <a href="{% url 'gestion_vehicules' %}" class="sidebar-link is-active">
+        <span class="icon">🚛</span> Mon véhicule
+      </a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <a href="{% url 'deconnexion' %}" class="sidebar-logout">
+        <span class="icon">🚪</span> Déconnexion
+      </a>
+    </div>
+  </aside>
+
+  <div class="dash-main">
+
+    <div class="dash-topbar">
+      <div>
+        <div class="dash-topbar-title">Mes véhicules</div>
+        <div style="font-size:12px; color:var(--ink-faint); margin-top:2px;">
+          {{ vehicules.count }} véhicule{% if vehicules.count > 1 %}s{% endif %} enregistré{% if vehicules.count > 1 %}s{% endif %}
+        </div>
+      </div>
+      <a href="{% url 'ajouter_vehicule' %}" class="btn btn-lemon" style="padding:10px 20px; font-size:14px;">
+        + Ajouter un véhicule
+      </a>
+    </div>
+
+    <div class="dash-body">
+
+      {% if vehicules %}
+      <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px,1fr)); gap:var(--sp-5);">
+        {% for v in vehicules %}
+        <div class="dash-card" style="padding:var(--sp-5);">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:var(--sp-4);">
+            <div style="width:48px; height:48px; border-radius:var(--r-md); background:var(--transporteur-soft); display:flex; align-items:center; justify-content:center; font-size:22px;">
+              {% if v.type_vehicule == 'camion' %}🚛{% elif v.type_vehicule == 'moto' %}🏍️{% elif v.type_vehicule == 'tracteur' %}🚜{% else %}🚐{% endif %}
+            </div>
+            <span class="status-badge {% if v.est_actif %}status-validee{% else %}status-annulee{% endif %}">
+              {% if v.est_actif %}Actif{% else %}Inactif{% endif %}
+            </span>
+          </div>
+          <div style="font-weight:700; font-size:16px; margin-bottom:4px;">{{ v.get_type_vehicule_display }}</div>
+          <div style="font-size:13px; color:var(--ink-faint); font-family:var(--font-mono); margin-bottom:var(--sp-3);">{{ v.immatriculation }}</div>
+          <div style="font-size:13px; color:var(--ink-soft);">
+            Capacité : <strong>{{ v.capacite_kg }} kg</strong><br>
+            Année : {{ v.annee }}{% if v.est_refrigere %} · ❄️ Réfrigéré{% endif %}
+          </div>
+          <form method="post" action="{% url 'supprimer_vehicule' v.pk %}" style="margin-top:var(--sp-4);">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-ghost btn-block" style="color:var(--danger); border-color:var(--danger-soft); font-size:13px; padding:8px;">Supprimer</button>
+          </form>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div style="text-align:center; padding:var(--sp-10) var(--sp-5);">
+        <div style="font-size:64px; margin-bottom:var(--sp-5);">🚛</div>
+        <h2 style="font-size:24px; margin-bottom:var(--sp-3);">Aucun véhicule enregistré</h2>
+        <p style="color:var(--ink-soft); margin-bottom:var(--sp-6);">Ajoutez votre véhicule pour pouvoir l'utiliser lors de vos livraisons.</p>
+        <a href="{% url 'ajouter_vehicule' %}" class="btn btn-lemon btn-lg">+ Ajouter mon véhicule</a>
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,104 @@
+{% extends 'base_auth.html' %}
+{% load static %}
+{% block title %}Messagerie — AgriMarché{% endblock %}
+
+{% block content %}
+<div class="dash-shell">
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <svg width="30" height="30" viewBox="0 0 36 36" fill="none">
+        <circle cx="18" cy="18" r="18" fill="#0B1F0E"/>
+        <path d="M18 6 C10 10 8 20 12 28 C14 24 16 20 18 18 C20 20 22 24 24 28 C28 20 26 10 18 6Z" fill="#7AE600"/>
+        <line x1="18" y1="8" x2="18" y2="27" stroke="#0B1F0E" stroke-width="1.2" stroke-linecap="round"/>
+        <line x1="18" y1="13" x2="13" y2="17" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+        <line x1="18" y1="17" x2="13" y2="21" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+        <line x1="18" y1="13" x2="23" y2="17" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+        <line x1="18" y1="17" x2="23" y2="21" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+      </svg>
+      <span class="sidebar-brand-text">Agri<span>Marché</span></span>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="sidebar-user-avatar" style="background:{% if request.user.est_agriculteur %}var(--agriculteur){% elif request.user.est_acheteur %}var(--acheteur){% elif request.user.est_transporteur %}var(--transporteur){% else %}var(--lemon){% endif %};">
+        {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
+      </div>
+      <div class="sidebar-user-name">{{ request.user.get_full_name }}</div>
+      <span class="sidebar-user-role role-badge-{{ request.user.role }}">{{ request.user.get_role_display }}</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <span class="sidebar-section-label">Principal</span>
+      <a href="{% url 'dashboard' %}" class="sidebar-link">
+        <span class="icon">🏠</span> Tableau de bord
+      </a>
+      <a href="{% url 'boite_reception' %}" class="sidebar-link is-active">
+        <span class="icon">💬</span> Messagerie
+      </a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <a href="{% url 'deconnexion' %}" class="sidebar-logout">
+        <span class="icon">🚪</span> Déconnexion
+      </a>
+    </div>
+  </aside>
+
+  <div class="dash-main">
+
+    <div class="dash-topbar">
+      <div>
+        <div class="dash-topbar-title">Messagerie</div>
+        <div style="font-size:12px; color:var(--ink-faint); margin-top:2px;">
+          {{ conversations.count }} conversation{% if conversations.count > 1 %}s{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="dash-body">
+
+      {% if conversations %}
+      <div class="dash-card">
+        {% for conv in conversations %}
+        {% with autre=conv.participants.all|first %}
+        <a href="{% url 'conversation_detail' conv.pk %}" style="display:flex; align-items:center; gap:var(--sp-4); padding:var(--sp-4) var(--sp-5); border-bottom:1px solid var(--line); text-decoration:none; transition:background .15s;" onmouseover="this.style.background='var(--bg-soft)'" onmouseout="this.style.background=''">
+          <div style="width:48px; height:48px; border-radius:50%; background:var(--lemon-soft); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:16px; color:var(--lemon-dark); flex-shrink:0;">
+            {% for p in conv.participants.all %}{% if p != request.user %}{{ p.first_name|first|upper }}{% endif %}{% endfor %}
+          </div>
+          <div style="flex:1; min-width:0;">
+            <div style="font-weight:700; font-size:14px; color:var(--ink);">
+              {% for p in conv.participants.all %}{% if p != request.user %}{{ p.get_full_name }}{% endif %}{% endfor %}
+            </div>
+            <div style="font-size:13px; color:var(--ink-faint); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px;">
+              {% with dernier=conv.messages.last %}
+                {% if dernier %}
+                  {% if dernier.expediteur == request.user %}Vous : {% endif %}{{ dernier.contenu|truncatechars:50 }}
+                {% else %}
+                  Aucun message
+                {% endif %}
+              {% endwith %}
+            </div>
+          </div>
+          {% with non_lus=conv.messages.all|length %}
+          <div style="font-size:11px; color:var(--ink-faint); font-family:var(--font-mono); flex-shrink:0;">
+            {% with dernier=conv.messages.last %}
+              {% if dernier %}{{ dernier.date_envoi|date:"d/m H:i" }}{% endif %}
+            {% endwith %}
+          </div>
+          {% endwith %}
+        </a>
+        {% endwith %}
+        {% endfor %}
+      </div>
+      {% else %}
+      <div style="text-align:center; padding:var(--sp-10) var(--sp-5);">
+        <div style="font-size:64px; margin-bottom:var(--sp-5);">💬</div>
+        <h2 style="font-size:24px; margin-bottom:var(--sp-3);">Aucune conversation</h2>
+        <p style="color:var(--ink-soft);">Vos discussions avec les agriculteurs, acheteurs et transporteurs apparaîtront ici.</p>
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+{% endblock %}

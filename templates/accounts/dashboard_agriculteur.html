@@ -1,0 +1,225 @@
+{% extends 'base_auth.html' %}
+{% load static %}
+{% block title %}Espace Agriculteur — AgriMarché{% endblock %}
+
+{% block content %}
+<div class="dash-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <svg width="30" height="30" viewBox="0 0 36 36" fill="none">
+        <circle cx="18" cy="18" r="18" fill="#0B1F0E"/>
+        <path d="M18 6 C10 10 8 20 12 28 C14 24 16 20 18 18 C20 20 22 24 24 28 C28 20 26 10 18 6Z" fill="#7AE600"/>
+        <line x1="18" y1="8" x2="18" y2="27" stroke="#0B1F0E" stroke-width="1.2" stroke-linecap="round"/>
+        <line x1="18" y1="13" x2="13" y2="17" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+        <line x1="18" y1="17" x2="13" y2="21" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+        <line x1="18" y1="13" x2="23" y2="17" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+        <line x1="18" y1="17" x2="23" y2="21" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+      </svg>
+      <span class="sidebar-brand-text">Agri<span>Marché</span></span>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="sidebar-user-avatar" style="background:var(--agriculteur);">
+        {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
+      </div>
+      <div class="sidebar-user-name">{{ request.user.get_full_name }}</div>
+      <span class="sidebar-user-role role-badge-agriculteur">Agriculteur</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <span class="sidebar-section-label">Principal</span>
+      <a href="{% url 'dashboard_agriculteur' %}" class="sidebar-link is-active">
+        <span class="icon">🏠</span> Tableau de bord
+      </a>
+      <a href="{% url 'mes_produits' %}" class="sidebar-link">
+        <span class="icon">🌿</span> Mes produits
+      </a>
+      <a href="{% url 'commandes_recues' %}" class="sidebar-link">
+        <span class="icon">📥</span> Commandes reçues
+        {% if total_commandes %}<span class="badge">{{ total_commandes }}</span>{% endif %}
+      </a>
+      <a href="{% url 'commandes_recues' %}" class="sidebar-link">
+        <span class="icon">🚚</span> Mes livraisons
+      </a>
+
+      <span class="sidebar-section-label" style="margin-top:var(--sp-3);">Compte</span>
+      <a href="{% url 'mon_profil' %}" class="sidebar-link">
+  <span class="icon">👤</span> Mon profil
+</a>
+      <a href="{% url 'mes_paiements' %}" class="sidebar-link">
+        <span class="icon">💰</span> Mes revenus
+      </a>
+      <a href="{% url 'prediction_revenus' %}" class="sidebar-link">
+  <span class="icon">📈</span> Prédiction revenus
+</a>
+<a href="{% url 'demande_categorie' %}" class="sidebar-link">
+  <span class="icon">📊</span> Demande marché
+</a>
+      <a href="{% url 'boite_reception'%}" class="sidebar-link">
+        <span class="icon">💬</span> Messagerie
+      </a>
+      <a href="{% url 'carte_catalogue' %}" class="sidebar-link">
+  <span class="icon">🗺️</span> Carte du marché
+</a>
+      <a href="{% url 'mes_avis' %}" class="sidebar-link">
+  <span class="icon">⭐</span> Mes avis
+</a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <a href="{% url 'deconnexion' %}" class="sidebar-logout">
+        <span class="icon">🚪</span> Déconnexion
+      </a>
+    </div>
+  </aside>
+
+  <!-- CONTENU PRINCIPAL -->
+  <div class="dash-main">
+
+    <div class="dash-topbar">
+      <div>
+        <div class="dash-topbar-title">Bonjour, {{ request.user.first_name }} 👋</div>
+        <div style="font-size:12px; color:var(--ink-faint); margin-top:2px;">{{ profil.exploitation }} — {{ profil.localisation }}</div>
+      </div>
+      <div class="dash-topbar-right">
+        <a href="{% url 'liste_notifications' %}" class="dash-notif-btn" style="text-decoration:none; position:relative;">
+  🔔
+  {% if nb_notifications_non_lues > 0 %}
+  <span class="dash-notif-dot"></span>
+  {% endif %}
+</a>
+        <a href="{% url 'publier_produit' %}" class="btn btn-lemon" style="padding:10px 20px; font-size:14px;">+ Publier un produit</a>
+      </div>
+    </div>
+
+    <div class="dash-body">
+
+      <div class="stat-grid">
+        <div class="stat-card stat-lemon">
+          <span class="stat-card-label">Produits actifs</span>
+          <div class="stat-card-value">{{ total_produits }}</div>
+          <div class="stat-card-sub">Annonces en ligne</div>
+          <span class="stat-card-icon">🌿</span>
+        </div>
+        <div class="stat-card stat-green">
+          <span class="stat-card-label">Commandes reçues</span>
+          <div class="stat-card-value">{{ total_commandes }}</div>
+          <div class="stat-card-sub">Total cumulé</div>
+          <span class="stat-card-icon">📥</span>
+        </div>
+        <div class="stat-card stat-blue">
+          <span class="stat-card-label">Revenus totaux</span>
+          <div class="stat-card-value" style="font-size:26px;">{{ revenus }}</div>
+          <div class="stat-card-sub">CDF encaissés</div>
+          <span class="stat-card-icon">💰</span>
+        </div>
+        <div class="stat-card stat-orange">
+          <span class="stat-card-label">Note moyenne</span>
+          <div class="stat-card-value">{{ profil.note_moyenne }}</div>
+          <div class="stat-card-sub">Sur 5 étoiles</div>
+          <span class="stat-card-icon">⭐</span>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1.3fr 1fr; gap:var(--sp-5);">
+
+        <!-- MES PRODUITS -->
+        <div class="dash-card">
+          <div class="dash-card-head">
+            <span class="dash-card-title">Mes produits</span>
+            <a href="{% url 'mes_produits' %}" class="dash-card-link">Voir tout →</a>
+          </div>
+          <table class="dash-table">
+            <thead>
+              <tr>
+                <th>Produit</th>
+                <th>Stock</th>
+                <th>Prix</th>
+                <th>Statut</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for produit in produits %}
+              <tr>
+                <td>
+                  <div style="display:flex; align-items:center; gap:var(--sp-2);">
+                    <div style="width:36px; height:36px; border-radius:var(--r-sm); background:var(--lemon-soft); display:flex; align-items:center; justify-content:center; font-size:18px;">🌿</div>
+                    <span style="font-weight:600; font-size:13px;">{{ produit.nom }}</span>
+                  </div>
+                </td>
+                <td style="font-family:var(--font-mono); font-size:13px;">{{ produit.quantite_disponible }} {{ produit.get_unite_display }}</td>
+                <td style="font-family:var(--font-mono); font-weight:700; font-size:13px;">{{ produit.prix_unitaire }} CDF</td>
+                <td>
+                  <span class="status-badge {% if produit.statut == 'actif' %}status-validee{% elif produit.statut == 'en_attente' %}status-attente{% else %}status-annulee{% endif %}">
+                    {{ produit.get_statut_display }}
+                  </span>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="4">
+                  <div class="empty-table">
+                    <span class="empty-icon">🌱</span>
+                    Aucun produit publié.
+                    <a href="#" style="color:var(--lemon-dark); font-weight:700; display:block; margin-top:var(--sp-2);">Publier votre première annonce →</a>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- COMMANDES RÉCENTES -->
+        <div class="dash-card">
+          <div class="dash-card-head">
+            <span class="dash-card-title">Commandes récentes</span>
+            <a href="#" class="dash-card-link">Voir tout →</a>
+          </div>
+          <table class="dash-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Acheteur</th>
+                <th>Montant</th>
+                <th>Statut</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for commande in commandes_recentes %}
+              <tr>
+                <td><span style="font-family:var(--font-mono); font-size:12px; color:var(--ink-faint);">#{{ commande.pk }}</span></td>
+                <td style="font-size:13px; font-weight:500;">{{ commande.acheteur.utilisateur.get_full_name }}</td>
+                <td style="font-family:var(--font-mono); font-weight:700; font-size:13px;">{{ commande.montant_total }} CDF</td>
+                <td>
+                  <span class="status-badge
+                    {% if commande.statut == 'en_attente' %}status-attente
+                    {% elif commande.statut == 'validee' %}status-validee
+                    {% elif commande.statut == 'en_livraison' %}status-livraison
+                    {% elif commande.statut == 'livree' %}status-livree
+                    {% else %}status-annulee{% endif %}">
+                    {{ commande.get_statut_display }}
+                  </span>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="4">
+                  <div class="empty-table">
+                    <span class="empty-icon">📥</span>
+                    Aucune commande reçue.
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

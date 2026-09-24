@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Catalogue — AgriMarché{% endblock %}
+
+{% block content %}
+
+<!-- TOPBAR CATALOGUE -->
+<div style="background:var(--soil); padding:var(--sp-6) 0;">
+  <div class="container">
+    <span class="eyebrow" style="color:var(--lemon);">Nos produits</span>
+    <h1 style="color:var(--white); font-size:clamp(28px,4vw,44px); margin-top:var(--sp-3);">
+      Catalogue agricole
+    </h1>
+    <p style="color:rgba(255,255,255,0.5); margin-top:var(--sp-2); font-size:15px;">
+      {{ total }} produit{% if total > 1 %}s{% endif %} disponible{% if total > 1 %}s{% endif %} en ce moment
+    </p>
+  </div>
+</div>
+
+<section style="padding:var(--sp-7) 0;">
+  <div class="container">
+    <div class="catalogue-shell">
+
+      <!-- SIDEBAR FILTRES -->
+      <aside class="catalogue-filters">
+        <form method="get" action="{% url 'catalogue' %}">
+
+          <div class="filter-block">
+            <div class="filter-title">Recherche</div>
+            <div style="position:relative;">
+              <input
+                type="text"
+                name="q"
+                class="input"
+                placeholder="Maïs, tomate, manioc..."
+                value="{{ recherche }}">
+            </div>
+          </div>
+
+          <div class="filter-block">
+            <div class="filter-title">Catégorie</div>
+            <div style="display:flex; flex-direction:column; gap:var(--sp-2);">
+              <label class="filter-option">
+                <input type="radio" name="categorie" value="" {% if not categorie_id %}checked{% endif %}>
+                <span>Toutes les catégories</span>
+              </label>
+              {% for cat in categories %}
+              <label class="filter-option">
+                <input type="radio" name="categorie" value="{{ cat.pk }}" {% if categorie_id == cat.pk|stringformat:"s" %}checked{% endif %}>
+                <span>{{ cat.icone }} {{ cat.nom }}</span>
+              </label>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="filter-block">
+            <div class="filter-title">Prix (CDF / kg)</div>
+            <div class="field-row">
+              <div class="field" style="margin-bottom:0;">
+                <label style="font-size:11px;">Min</label>
+                <input type="number" name="prix_min" class="input" placeholder="0" value="{{ request.GET.prix_min }}">
+              </div>
+              <div class="field" style="margin-bottom:0;">
+                <label style="font-size:11px;">Max</label>
+                <input type="number" name="prix_max" class="input" placeholder="9999" value="{{ request.GET.prix_max }}">
+              </div>
+            </div>
+          </div>
+
+          <div class="filter-block">
+            <div class="filter-title">Options</div>
+            <label class="filter-option">
+              <input type="checkbox" name="bio" value="1" {% if request.GET.bio %}checked{% endif %}>
+              <span>🌿 Produits bio uniquement</span>
+            </label>
+          </div>
+
+          <button type="submit" class="btn btn-lemon btn-block" style="margin-top:var(--sp-2);">
+            Appliquer les filtres
+          </button>
+          <a href="{% url 'catalogue' %}" class="btn btn-ghost btn-block" style="margin-top:var(--sp-2);">
+            Réinitialiser
+          </a>
+
+        </form>
+      </aside>
+
+      <!-- GRILLE PRODUITS -->
+      <div class="catalogue-grid-wrap">
+
+        {% if recherche %}
+        <div style="margin-bottom:var(--sp-5); padding:var(--sp-3) var(--sp-4); background:var(--lemon-soft); border-radius:var(--r-md); font-size:14px;">
+          Résultats pour <strong>"{{ recherche }}"</strong> — {{ total }} produit{% if total > 1 %}s{% endif %}
+          <a href="{% url 'catalogue' %}" style="margin-left:var(--sp-3); color:var(--lemon-dark); font-weight:600;">Effacer ×</a>
+        </div>
+        {% endif %}
+
+        <div class="catalogue-grid">
+          {% for produit in produits %}
+          <article class="produce-card">
+            <a href="{% url 'detail_produit' produit.pk %}">
+              <div class="produce-media">
+                {% with photo=produit.photos.first %}
+                  {% if photo %}
+                    <img src="{{ photo.image.url }}" alt="{{ produit.nom }}">
+                  {% else %}
+                    <div class="produce-placeholder">🌿</div>
+                  {% endif %}
+                {% endwith %}
+                {% if produit.est_bio %}<span class="badge-bio">BIO</span>{% endif %}
+              </div>
+            </a>
+            <div class="produce-body">
+              <p class="produce-farmer">
+                🌾 {{ produit.agriculteur.utilisateur.get_full_name }}
+                {% if produit.agriculteur.est_verifie %}
+                  <span style="color:var(--lemon-dark); font-size:11px;">✓ Vérifié</span>
+                {% endif %}
+              </p>
+              <h3 class="produce-name">
+                <a href="{% url 'detail_produit' produit.pk %}" style="color:var(--ink);">{{ produit.nom }}</a>
+              </h3>
+              {% if produit.categorie %}
+              <span style="font-size:11px; color:var(--ink-faint); font-family:var(--font-mono);">{{ produit.categorie.nom }}</span>
+              {% endif %}
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-top:var(--sp-3);">
+                <div>
+                  <span class="produce-price">
+                    <span class="mono">{{ produit.prix_unitaire }} CDF</span> / {{ produit.get_unite_display }}
+                  </span>
+                  <div style="font-size:11px; color:var(--ink-faint); margin-top:2px;">
+                    Stock : {{ produit.quantite_disponible }} {{ produit.get_unite_display }}
+                  </div>
+                </div>
+                <a href="{% url 'detail_produit' produit.pk %}" class="btn btn-lemon" style="padding:8px 14px; font-size:13px;">
+                  Voir →
+                </a>
+              </div>
+            </div>
+          </article>
+          {% empty %}
+          <div class="empty-state" style="grid-column:1/-1;">
+            <span style="font-size:48px; display:block; margin-bottom:var(--sp-4);">🌱</span>
+            Aucun produit trouvé pour ces critères.
+            <a href="{% url 'catalogue' %}" style="color:var(--lemon-dark); font-weight:700; display:block; margin-top:var(--sp-3);">
+              Voir tous les produits →
+            </a>
+          </div>
+          {% endfor %}
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

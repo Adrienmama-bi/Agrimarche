@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Évaluer la commande #{{ commande.pk }} — AgriMarché{% endblock %}
+
+{% block content %}
+<section style="padding:var(--sp-7) 0; background:var(--bg-soft); min-height:80vh;">
+  <div class="container" style="max-width:560px;">
+
+    <h1 style="font-size:24px; margin-bottom:var(--sp-2);">Évaluer votre commande</h1>
+    <p style="color:var(--ink-soft); font-size:14px; margin-bottom:var(--sp-6);">
+      Commande #{{ commande.pk }} — Votre avis aide les autres acheteurs.
+    </p>
+
+    <form method="post">
+      {% csrf_token %}
+
+      <!-- ÉVALUATION AGRICULTEUR -->
+      <div style="background:var(--white); border-radius:var(--r-lg); padding:var(--sp-6); margin-bottom:var(--sp-5); box-shadow:var(--shadow-sm);">
+        <div style="display:flex; align-items:center; gap:var(--sp-3); margin-bottom:var(--sp-5);">
+          <div style="width:44px; height:44px; border-radius:50%; background:var(--agriculteur-soft); display:flex; align-items:center; justify-content:center; font-size:18px;">🌾</div>
+          <div>
+            <div style="font-weight:700; font-size:15px;">{{ commande.agriculteur.utilisateur.get_full_name }}</div>
+            <div style="font-size:12px; color:var(--ink-faint);">Agriculteur</div>
+          </div>
+        </div>
+
+        <div class="star-rating" data-target="note_agriculteur" style="margin-bottom:var(--sp-4);">
+          <span data-value="1">★</span>
+          <span data-value="2">★</span>
+          <span data-value="3">★</span>
+          <span data-value="4">★</span>
+          <span data-value="5">★</span>
+          <input type="hidden" name="note_agriculteur" value="5">
+        </div>
+
+        <textarea name="commentaire_agriculteur" class="input" rows="3" placeholder="Votre expérience avec ce vendeur (optionnel)"></textarea>
+      </div>
+
+      <!-- ÉVALUATION TRANSPORTEUR -->
+      {% if a_transporteur %}
+      <div style="background:var(--white); border-radius:var(--r-lg); padding:var(--sp-6); margin-bottom:var(--sp-6); box-shadow:var(--shadow-sm);">
+        <div style="display:flex; align-items:center; gap:var(--sp-3); margin-bottom:var(--sp-5);">
+          <div style="width:44px; height:44px; border-radius:50%; background:var(--transporteur-soft); display:flex; align-items:center; justify-content:center; font-size:18px;">🚛</div>
+          <div>
+            <div style="font-weight:700; font-size:15px;">{{ commande.livraison.transporteur.utilisateur.get_full_name }}</div>
+            <div style="font-size:12px; color:var(--ink-faint);">Transporteur</div>
+          </div>
+        </div>
+
+        <div class="star-rating" data-target="note_transporteur" style="margin-bottom:var(--sp-4);">
+          <span data-value="1">★</span>
+          <span data-value="2">★</span>
+          <span data-value="3">★</span>
+          <span data-value="4">★</span>
+          <span data-value="5">★</span>
+          <input type="hidden" name="note_transporteur" value="5">
+        </div>
+
+        <textarea name="commentaire_transporteur" class="input" rows="3" placeholder="Votre expérience avec la livraison (optionnel)"></textarea>
+      </div>
+      {% endif %}
+
+      <button type="submit" class="btn btn-lemon btn-block btn-lg">
+        Envoyer mon évaluation →
+      </button>
+      <a href="{% url 'detail_commande' commande.pk %}" class="btn btn-ghost btn-block" style="margin-top:var(--sp-3);">
+        Passer cette étape
+      </a>
+    </form>
+
+  </div>
+</section>
+
+<style>
+.star-rating {
+  display: flex;
+  gap: 6px;
+  font-size: 28px;
+}
+.star-rating span {
+  color: var(--line);
+  cursor: pointer;
+  transition: color .15s;
+}
+.star-rating span.is-active {
+  color: var(--harvest, #E8A020);
+}
+</style>
+
+<script>
+  document.querySelectorAll('.star-rating').forEach(function(rating) {
+    const stars = rating.querySelectorAll('span');
+    const input = rating.querySelector('input[type="hidden"]');
+
+    function setStars(value) {
+      stars.forEach(function(star) {
+        star.classList.toggle('is-active', parseInt(star.dataset.value) <= value);
+      });
+      input.value = value;
+    }
+
+    stars.forEach(function(star) {
+      star.addEventListener('click', function() {
+        setStars(parseInt(star.dataset.value));
+      });
+    });
+
+    setStars(5);
+  });
+</script>
+
+{% endblock %}

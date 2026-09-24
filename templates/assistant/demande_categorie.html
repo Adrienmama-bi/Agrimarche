@@ -1,0 +1,84 @@
+{% extends 'base_auth.html' %}
+{% block title %}Prévision demande — AgriMarché{% endblock %}
+
+{% block content %}
+<div class="dash-shell">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <svg width="30" height="30" viewBox="0 0 36 36" fill="none">
+        <circle cx="18" cy="18" r="18" fill="#0B1F0E"/>
+        <path d="M18 6 C10 10 8 20 12 28 C14 24 16 20 18 18 C20 20 22 24 24 28 C28 20 26 10 18 6Z" fill="#7AE600"/>
+      </svg>
+      <span class="sidebar-brand-text">Agri<span>Marché</span></span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="{% url 'dashboard' %}" class="sidebar-link"><span class="icon">🏠</span> Tableau de bord</a>
+      <a href="{% url 'prediction_revenus' %}" class="sidebar-link"><span class="icon">📈</span> Prédiction revenus</a>
+      <a href="{% url 'demande_categorie' %}" class="sidebar-link is-active"><span class="icon">📊</span> Demande marché</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <a href="{% url 'deconnexion' %}" class="sidebar-logout"><span class="icon">🚪</span> Déconnexion</a>
+    </div>
+  </aside>
+
+  <div class="dash-main">
+    <div class="dash-topbar">
+      <div class="dash-topbar-title">📊 Prévision de la demande</div>
+    </div>
+    <div class="dash-body">
+
+      <!-- Filtre -->
+      <div class="dash-card" style="padding:var(--sp-5); margin-bottom:var(--sp-5);">
+        <form method="get" style="display:flex; gap:var(--sp-4); align-items:flex-end;">
+          <div class="field" style="flex:1; margin-bottom:0;">
+            <label>Catégorie de produit</label>
+            <select name="categorie_id" class="input" onchange="this.form.submit()">
+              <option value="">-- Choisir une catégorie --</option>
+              {% for cat in categories %}
+              <option value="{{ cat.pk }}" {% if cat.pk|stringformat:"s" == categorie_id %}selected{% endif %}>
+                {{ cat.icone }} {{ cat.nom }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+        </form>
+      </div>
+
+      {% if resultats %}
+      <!-- Résultats -->
+      <div style="display:grid; grid-template-columns:repeat({% if resultats|length == 4 %}4{% else %}3{% endif %},1fr); gap:var(--sp-4);">
+        {% for r in resultats %}
+        <div class="dash-card" style="padding:var(--sp-5); text-align:center;">
+          <div style="font-size:13px; font-weight:700; color:var(--ink-faint); margin-bottom:var(--sp-3);">{{ r.mois }}</div>
+          <div style="font-size:36px; font-weight:800; font-family:var(--font-display); color:{% if r.tendance == 'hausse' %}var(--success){% elif r.tendance == 'baisse' %}var(--danger){% else %}var(--lemon-dark){% endif %};">
+            {{ r.nb_commandes_prevu }}
+          </div>
+          <div style="font-size:12px; color:var(--ink-faint); margin-bottom:var(--sp-3);">commandes prévues</div>
+          <span class="status-badge {% if r.tendance == 'hausse' %}status-validee{% elif r.tendance == 'baisse' %}status-annulee{% else %}status-attente{% endif %}">
+            {% if r.tendance == 'hausse' %}↑ Hausse
+            {% elif r.tendance == 'baisse' %}↓ Baisse
+            {% else %}→ Stable{% endif %}
+          </span>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="dash-card" style="padding:var(--sp-5); margin-top:var(--sp-5);">
+        <p style="font-size:13px; color:var(--ink-soft); margin:0;">
+          💡 Ces prévisions sont basées sur les commandes passées sur la plateforme pour la catégorie
+          <strong>{{ categorie.nom }}</strong>, ajustées selon les coefficients saisonniers agricoles camerounais.
+        </p>
+      </div>
+
+      {% else %}
+      <div style="text-align:center; padding:var(--sp-10);">
+        <div style="font-size:64px; margin-bottom:var(--sp-5);">📊</div>
+        <h2 style="font-size:22px; margin-bottom:var(--sp-3);">Analysez la demande du marché</h2>
+        <p style="color:var(--ink-soft);">Sélectionnez une catégorie pour voir les prévisions de commandes sur les 4 prochains mois.</p>
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+{% endblock %}

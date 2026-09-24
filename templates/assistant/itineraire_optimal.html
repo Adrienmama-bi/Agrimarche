@@ -1,0 +1,223 @@
+{% extends 'base_auth.html' %}
+{% load static %}
+{% block title %}Itinéraire optimal — AgriMarché{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+#carte-itineraire { height: 400px; border-radius: var(--r-lg); overflow: hidden; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dash-shell">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <svg width="30" height="30" viewBox="0 0 36 36" fill="none">
+        <circle cx="18" cy="18" r="18" fill="#0B1F0E"/>
+        <path d="M18 6 C10 10 8 20 12 28 C14 24 16 20 18 18 C20 20 22 24 24 28 C28 20 26 10 18 6Z" fill="#7AE600"/>
+      </svg>
+      <span class="sidebar-brand-text">Agri<span>Marché</span></span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="{% url 'dashboard_transporteur' %}" class="sidebar-link"><span class="icon">🏠</span> Tableau de bord</a>
+      <a href="{% url 'missions_disponibles' %}" class="sidebar-link"><span class="icon">📋</span> Missions</a>
+      <a href="{% url 'mes_livraisons' %}" class="sidebar-link"><span class="icon">🚚</span> Mes livraisons</a>
+      <a href="{% url 'itineraire_optimal' %}" class="sidebar-link is-active"><span class="icon">🗺️</span> Itinéraire optimal</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <a href="{% url 'deconnexion' %}" class="sidebar-logout"><span class="icon">🚪</span> Déconnexion</a>
+    </div>
+  </aside>
+
+  <div class="dash-main">
+    <div class="dash-topbar">
+      <div>
+        <div class="dash-topbar-title">🗺️ Itinéraire optimal</div>
+        <div style="font-size:12px; color:var(--ink-faint);">L'IA calcule le meilleur ordre pour vos livraisons</div>
+      </div>
+      <button onclick="activerGPS()" class="btn btn-lemon" style="padding:10px 20px;">📍 Activer mon GPS</button>
+    </div>
+
+    <div class="dash-body">
+
+      {% if not position_connue %}
+      <!-- Pas de position -->
+      <div style="text-align:center; padding:var(--sp-10);">
+        <div style="font-size:64px; margin-bottom:var(--sp-5);">📍</div>
+        <h2>Activez votre GPS</h2>
+        <p style="color:var(--ink-soft); margin-bottom:var(--sp-6);">Pour calculer votre itinéraire optimal, nous avons besoin de votre position actuelle.</p>
+        <button onclick="activerGPS()" class="btn btn-lemon btn-lg">📍 Partager ma position</button>
+      </div>
+
+      {% elif not livraisons %}
+      <!-- Pas de livraisons -->
+      <div style="text-align:center; padding:var(--sp-10);">
+        <div style="font-size:64px; margin-bottom:var(--sp-5);">🚛</div>
+        <h2>Aucune livraison active</h2>
+        <p style="color:var(--ink-soft);">Acceptez des missions pour voir votre itinéraire optimisé.</p>
+        <a href="{% url 'missions_disponibles' %}" class="btn btn-lemon btn-lg" style="margin-top:var(--sp-5);">Voir les missions</a>
+      </div>
+
+      {% elif itineraire %}
+      <!-- Résultats -->
+
+      <!-- Statistiques -->
+      <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:var(--sp-4); margin-bottom:var(--sp-5);">
+        <div class="dash-card" style="padding:var(--sp-5); text-align:center;">
+          <div style="font-size:28px; font-weight:800; color:var(--lemon-dark);">{{ itineraire.distance_totale_km }} km</div>
+          <div style="font-size:12px; color:var(--ink-faint);">Distance totale</div>
+        </div>
+        <div class="dash-card" style="padding:var(--sp-5); text-align:center;">
+          <div style="font-size:28px; font-weight:800; color:var(--lemon-dark);">{{ itineraire.duree_totale_minutes }} min</div>
+          <div style="font-size:12px; color:var(--ink-faint);">Durée estimée</div>
+        </div>
+        <div class="dash-card" style="padding:var(--sp-5); text-align:center; background:var(--lemon-soft);">
+          <div style="font-size:28px; font-weight:800; color:var(--success);">{{ itineraire.economie_estimee.carburant_economise_cfa }} CFA</div>
+          <div style="font-size:12px; color:var(--ink-faint);">Économie carburant estimée</div>
+        </div>
+      </div>
+
+      <!-- Carte -->
+      <div class="dash-card" style="padding:var(--sp-5); margin-bottom:var(--sp-5);">
+        <h3 style="font-size:16px; margin-bottom:var(--sp-4);">Carte de l'itinéraire</h3>
+        <div id="carte-itineraire"></div>
+      </div>
+
+      <!-- Liste des étapes -->
+      <div class="dash-card">
+        <div class="dash-card-head">
+          <span class="dash-card-title">Ordre de livraison recommandé</span>
+          <span style="font-size:12px; color:var(--lemon-dark); font-weight:700;">✨ Optimisé par IA</span>
+        </div>
+        {% for etape in itineraire.ordre %}
+        <div style="padding:var(--sp-5); border-bottom:1px solid var(--line); display:flex; align-items:center; gap:var(--sp-4);">
+          <!-- Numéro étape -->
+          <div style="width:36px; height:36px; border-radius:50%; background:var(--soil); color:var(--lemon); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; flex-shrink:0;">
+            {{ etape.ordre_num }}
+          </div>
+          <!-- Infos -->
+          <div style="flex:1;">
+            <div style="font-weight:700; font-size:14px;">{{ etape.acheteur_nom }}</div>
+            <div style="font-size:13px; color:var(--ink-soft);">📍 {{ etape.adresse }}</div>
+            <div style="font-size:11px; color:var(--ink-faint); margin-top:4px;">
+              {{ etape.distance_km }} km — {{ etape.duree_minutes }} min
+            </div>
+          </div>
+          <!-- Montant -->
+          <div style="text-align:right;">
+            <div style="font-weight:800; font-size:15px; color:var(--lemon-dark);">{{ etape.montant|floatformat:0 }} CFA</div>
+            <a href="/livraisons/{{ etape.id }}/" class="btn btn-ghost" style="font-size:11px; padding:4px 10px; margin-top:4px;">Voir →</a>
+          </div>
+        </div>
+        {% endfor %}
+        <!-- Économie -->
+        {% if itineraire.economie_estimee %}
+        <div style="padding:var(--sp-4); background:var(--lemon-soft); border-top:1px solid var(--lemon);">
+          <div style="font-size:13px; color:var(--lemon-dark);">
+            💚 L'algorithme vous fait économiser <strong>{{ itineraire.economie_estimee.km_economises }} km</strong>
+            soit environ <strong>{{ itineraire.economie_estimee.carburant_economise_cfa }} CFA</strong> de carburant
+            par rapport à un ordre aléatoire.
+          </div>
+        </div>
+        {% endif %}
+      </div>
+
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+
+{% if itineraire %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const ETAPES = {{ itineraire.markers_json|safe }};
+const DEPART_LAT = {{ itineraire.depart_lat }};
+const DEPART_LNG = {{ itineraire.depart_lng }};
+
+const carte = L.map('carte-itineraire', {
+  center: [DEPART_LAT, DEPART_LNG],
+  zoom: 11,
+});
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© OpenStreetMap',
+  maxZoom: 19,
+}).addTo(carte);
+
+// Marqueur départ (transporteur)
+L.marker([DEPART_LAT, DEPART_LNG], {
+  icon: L.divIcon({
+    className: '',
+    html: <div style="background:#006EFF;color:#fff;border:2px solid #fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 2px 8px rgba(0,0,0,0.3);">🚛</div>,
+    iconSize: [32, 32],
+    iconAnchor: [16, 16],
+  })
+}).addTo(carte).bindPopup('📍 Votre position');
+
+// Points de livraison avec numéros
+const coords = [[DEPART_LAT, DEPART_LNG]];
+
+ETAPES.forEach(function(e) {
+  const marker = L.marker([e.lat, e.lng], {
+    icon: L.divIcon({
+      className: '',
+      html: <div style="background:#0B1F0E;color:#7AE600;border:2px solid #7AE600;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;box-shadow:0 2px 8px rgba(0,0,0,0.3);">${e.ordre}</div>,
+      iconSize: [32, 32],
+      iconAnchor: [16, 16],
+    })
+  }).addTo(carte);
+
+  marker.bindPopup(`
+    <strong>${e.nom}</strong><br>
+    📍 ${e.adresse}<br>
+    🚗 ${e.distance} km — ${e.duree} min
+  `);
+
+  coords.push([e.lat, e.lng]);
+});
+
+// Ligne de l'itinéraire
+if (coords.length > 1) {
+  L.polyline(coords, {
+    color: '#7AE600',
+    weight: 4,
+    opacity: 0.8,
+    dashArray: '10, 5',
+  }).addTo(carte);
+}
+
+// Ajuster la vue
+if (coords.length > 1) {
+  carte.fitBounds(coords, { padding: [30, 30] });
+}
+</script>
+{% endif %}
+
+<script>
+function activerGPS() {
+  if (!navigator.geolocation) {
+    alert('Géolocalisation non supportée par votre navigateur.');
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(function(pos) {
+    fetch('/assistant/position/maj/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': '{{ csrf_token }}',
+      },
+      body: JSON.stringify({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+    }).then(function(r) { return r.json(); }).then(function(data) {
+      if (data.ok) {
+        alert('Position enregistrée ! Rechargement...');
+        location.reload();
+      }
+    });
+  }, function() {
+    alert('Impossible d\'obtenir votre position. Vérifiez les autorisations.');
+  });
+}
+</script>
+{% endblock %}

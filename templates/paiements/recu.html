@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Reçu — AgriMarché{% endblock %}
+
+{% block content %}
+<section style="padding:var(--sp-7) 0; background:var(--bg-soft); min-height:80vh;">
+  <div class="container" style="max-width:520px;">
+
+    <div style="text-align:center; margin-bottom:var(--sp-6);">
+      <div style="width:72px; height:72px; border-radius:50%; background:var(--lemon); display:flex; align-items:center; justify-content:center; font-size:32px; margin:0 auto var(--sp-4);">✓</div>
+      <h1 style="font-size:26px;">Paiement confirmé !</h1>
+      <p style="color:var(--ink-soft); margin-top:var(--sp-2);">Votre commande a été transmise à l'agriculteur.</p>
+    </div>
+
+    <!-- REÇU -->
+    <div style="background:var(--white); border-radius:var(--r-lg); padding:var(--sp-6); box-shadow:var(--shadow-md);">
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--sp-5); padding-bottom:var(--sp-5); border-bottom:1px dashed var(--line);">
+        <div>
+          <div style="font-family:var(--font-display); font-weight:800; font-size:18px;">Agri<span style="color:var(--lemon-dark);">Marché</span></div>
+          <div style="font-size:11px; color:var(--ink-faint); font-family:var(--font-mono); margin-top:2px;">REÇU DE PAIEMENT</div>
+        </div>
+        <span class="status-badge status-validee">{{ paiement.get_statut_display }}</span>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-4); margin-bottom:var(--sp-5); font-size:13px;">
+        <div>
+          <div style="color:var(--ink-faint); font-family:var(--font-mono); font-size:10px; text-transform:uppercase;">Référence</div>
+          <div style="font-weight:600; margin-top:2px;">{{ paiement.reference_externe }}</div>
+        </div>
+        <div>
+          <div style="color:var(--ink-faint); font-family:var(--font-mono); font-size:10px; text-transform:uppercase;">Date</div>
+          <div style="font-weight:600; margin-top:2px;">{{ paiement.date_transaction|date:"d/m/Y à H:i" }}</div>
+        </div>
+        <div>
+          <div style="color:var(--ink-faint); font-family:var(--font-mono); font-size:10px; text-transform:uppercase;">Méthode</div>
+          <div style="font-weight:600; margin-top:2px;">{{ paiement.get_methode_display }}</div>
+        </div>
+        <div>
+          <div style="color:var(--ink-faint); font-family:var(--font-mono); font-size:10px; text-transform:uppercase;">Commande</div>
+          <div style="font-weight:600; margin-top:2px;">#{{ paiement.commande.pk }}</div>
+        </div>
+      </div>
+
+      <div style="background:var(--bg-soft); border-radius:var(--r-md); padding:var(--sp-4);">
+        <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:8px;">
+          <span>Sous-total produits</span>
+          <span style="font-family:var(--font-mono);">{{ paiement.montant }} FCFA</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:13px; color:var(--ink-faint); margin-bottom:8px;">
+          <span>Commission plateforme (3%)</span>
+          <span style="font-family:var(--font-mono);">{{ paiement.commission }} FCFA</span>
+        </div>
+        <div style="border-top:1px solid var(--line); margin-top:var(--sp-3); padding-top:var(--sp-3); display:flex; justify-content:space-between;">
+          <strong>Total payé</strong>
+          <strong style="font-family:var(--font-mono); color:var(--lemon-dark); font-size:18px;">{{ paiement.montant }} CDF</strong>
+        </div>
+      </div>
+
+    </div>
+
+    <div style="display:flex; gap:var(--sp-3); margin-top:var(--sp-6);">
+      <a href="{% url 'detail_commande' paiement.commande.pk %}" class="btn btn-lemon btn-block">Voir ma commande</a>
+      <a href="{% url 'catalogue' %}" class="btn btn-ghost btn-block">Continuer mes achats</a>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

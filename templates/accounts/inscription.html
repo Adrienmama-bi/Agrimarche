@@ -1,0 +1,232 @@
+{% extends 'base_auth.html' %}
+{% load static %}
+{% block title %}Inscription — AgriMarché{% endblock %}
+
+{% block content %}
+<div class="auth-shell">
+
+  <!-- CÔTÉ GAUCHE : BRANDING -->
+  <aside class="auth-brand">
+    <div class="auth-brand-top">
+      <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+        <circle cx="18" cy="18" r="18" fill="#7AE600"/>
+        <path d="M18 6 C10 10 8 20 12 28 C14 24 16 20 18 18 C20 20 22 24 24 28 C28 20 26 10 18 6Z" fill="#0B1F0E"/>
+        <line x1="18" y1="8" x2="18" y2="27" stroke="#7AE600" stroke-width="1.2" stroke-linecap="round"/>
+        <line x1="18" y1="13" x2="13" y2="17" stroke="#7AE600" stroke-width="0.8" stroke-linecap="round"/>
+        <line x1="18" y1="17" x2="13" y2="21" stroke="#7AE600" stroke-width="0.8" stroke-linecap="round"/>
+        <line x1="18" y1="13" x2="23" y2="17" stroke="#7AE600" stroke-width="0.8" stroke-linecap="round"/>
+        <line x1="18" y1="17" x2="23" y2="21" stroke="#7AE600" stroke-width="0.8" stroke-linecap="round"/>
+      </svg>
+      <span class="logo-text">Agri<span class="logo-dot-text">Marché</span></span>
+    </div>
+
+    <div class="auth-brand-mid">
+      <h2>Rejoignez le marché agricole digital.</h2>
+      <p>Que vous récoltiez, achetiez ou livriez, AgriMarché vous connecte directement aux deux autres acteurs de la chaîne.</p>
+
+      <div style="margin-top:var(--sp-6); background:rgba(122,230,0,0.08); border:1px solid rgba(122,230,0,0.15); border-radius:var(--r-lg); padding:var(--sp-5);">
+        <div style="font-family:var(--font-mono); font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:var(--lemon); margin-bottom:var(--sp-4);">Pourquoi AgriMarché ?</div>
+        <div style="display:flex; flex-direction:column; gap:var(--sp-3);">
+          <div style="display:flex; align-items:center; gap:var(--sp-3); font-size:13px; color:rgba(255,255,255,0.75);">
+            <span style="color:var(--lemon); font-size:16px;">✓</span> Inscription gratuite en 2 minutes
+          </div>
+          <div style="display:flex; align-items:center; gap:var(--sp-3); font-size:13px; color:rgba(255,255,255,0.75);">
+            <span style="color:var(--lemon); font-size:16px;">✓</span> Paiement sécurisé Mobile Money
+          </div>
+          <div style="display:flex; align-items:center; gap:var(--sp-3); font-size:13px; color:rgba(255,255,255,0.75);">
+            <span style="color:var(--lemon); font-size:16px;">✓</span> Suivi de livraison en temps réel
+          </div>
+          <div style="display:flex; align-items:center; gap:var(--sp-3); font-size:13px; color:rgba(255,255,255,0.75);">
+            <span style="color:var(--lemon); font-size:16px;">✓</span> Support disponible 7j/7
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="auth-brand-stats">
+      <div>
+        <span class="num">1 200+</span>
+        <span class="label">Agriculteurs</span>
+      </div>
+      <div>
+        <span class="num">15 000+</span>
+        <span class="label">Commandes</span>
+      </div>
+      <div>
+        <span class="num">98%</span>
+        <span class="label">À l'heure</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- CÔTÉ DROIT : FORMULAIRE -->
+  <div class="auth-form-side">
+    <div class="auth-form-box">
+      <a href="{% url 'accueil' %}" class="top-link">← Retour à l'accueil</a>
+
+      <div style="margin-bottom:var(--sp-5);">
+        <h1>Créer un compte</h1>
+        <p class="sub">Choisissez votre rôle pour commencer.</p>
+      </div>
+
+      {% include 'partials/_messages.html' %}
+
+      <!-- SÉLECTEUR DE RÔLE -->
+      <div class="role-tabs">
+        <button type="button" class="role-tab" data-role="agriculteur">
+          <span class="ico">🌾</span>
+          <span class="lbl">Agriculteur</span>
+        </button>
+        <button type="button" class="role-tab" data-role="acheteur">
+          <span class="ico">🛒</span>
+          <span class="lbl">Acheteur</span>
+        </button>
+        <button type="button" class="role-tab" data-role="transporteur">
+          <span class="ico">🚛</span>
+          <span class="lbl">Transporteur</span>
+        </button>
+      </div>
+
+      <form method="post" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="role" id="role-input" value="{{ role_initial }}">
+
+        <div class="field-row">
+          <div class="field">
+            <label for="id_first_name">Prénom</label>
+            <input type="text" name="first_name" id="id_first_name"
+              class="input{% if form.first_name.errors %} has-error{% endif %}"
+              value="{{ form.first_name.value|default:'' }}"
+              placeholder="Jean"
+              required>
+            {% if form.first_name.errors %}<span class="field-error">{{ form.first_name.errors.0 }}</span>{% endif %}
+          </div>
+          <div class="field">
+            <label for="id_last_name">Nom</label>
+            <input type="text" name="last_name" id="id_last_name"
+              class="input{% if form.last_name.errors %} has-error{% endif %}"
+              value="{{ form.last_name.value|default:'' }}"
+              placeholder="Kabila"
+              required>
+            {% if form.last_name.errors %}<span class="field-error">{{ form.last_name.errors.0 }}</span>{% endif %}
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="id_username">Nom d'utilisateur</label>
+          <input type="text" name="username" id="id_username"
+            class="input{% if form.username.errors %} has-error{% endif %}"
+            value="{{ form.username.value|default:'' }}"
+            placeholder="jean_kabila"
+            required>
+          {% if form.username.errors %}<span class="field-error">{{ form.username.errors.0 }}</span>{% endif %}
+        </div>
+
+        <div class="field">
+          <label for="id_email">Adresse email</label>
+          <input type="email" name="email" id="id_email"
+            class="input{% if form.email.errors %} has-error{% endif %}"
+            value="{{ form.email.value|default:'' }}"
+            placeholder="jean@exemple.com"
+            required>
+          {% if form.email.errors %}<span class="field-error">{{ form.email.errors.0 }}</span>{% endif %}
+        </div>
+
+        <div class="field">
+          <label for="id_telephone">Téléphone</label>
+          <input type="text" name="telephone" id="id_telephone"
+            class="input{% if form.telephone.errors %} has-error{% endif %}"
+            value="{{ form.telephone.value|default:'' }}"
+            placeholder="+243 81 234 5678"
+            required>
+          {% if form.telephone.errors %}<span class="field-error">{{ form.telephone.errors.0 }}</span>{% endif %}
+        </div>
+
+        <!-- CHAMPS AGRICULTEUR -->
+        <div class="role-fields" data-role-fields="agriculteur">
+          <div style="background:var(--agriculteur-soft); border:1px solid rgba(29,184,32,0.2); border-radius:var(--r-md); padding:var(--sp-4); margin-bottom:var(--sp-4);">
+            <div style="font-family:var(--font-mono); font-size:10px; letter-spacing:0.12em; text-transform:uppercase; color:var(--agriculteur-dark); margin-bottom:var(--sp-3);">Informations agriculteur</div>
+            <div class="field" style="margin-bottom:var(--sp-3);">
+              <label for="id_exploitation">Nom de l'exploitation</label>
+              <input type="text" name="exploitation" id="id_exploitation"
+                class="input"
+                value="{{ form.exploitation.value|default:'' }}"
+                placeholder="Ferme Kabila">
+              {% if form.exploitation.errors %}<span class="field-error">{{ form.exploitation.errors.0 }}</span>{% endif %}
+            </div>
+            <div class="field" style="margin-bottom:0;">
+              <label for="id_localisation">Localisation</label>
+              <input type="text" name="localisation" id="id_localisation"
+                class="input"
+                value="{{ form.localisation.value|default:'' }}"
+                placeholder="Kinshasa, RDC">
+            </div>
+          </div>
+        </div>
+
+        <!-- CHAMPS ACHETEUR -->
+        <div class="role-fields" data-role-fields="acheteur">
+          <div style="background:var(--acheteur-soft); border:1px solid rgba(255,85,0,0.2); border-radius:var(--r-md); padding:var(--sp-4); margin-bottom:var(--sp-4);">
+            <div style="font-family:var(--font-mono); font-size:10px; letter-spacing:0.12em; text-transform:uppercase; color:var(--acheteur-dark); margin-bottom:var(--sp-3);">Informations acheteur</div>
+            <div class="field" style="margin-bottom:0;">
+              <label for="id_adresse_livraison">Adresse de livraison</label>
+              <input type="text" name="adresse_livraison" id="id_adresse_livraison"
+                class="input"
+                value="{{ form.adresse_livraison.value|default:'' }}"
+                placeholder="Avenue de la Paix, Kinshasa">
+              {% if form.adresse_livraison.errors %}<span class="field-error">{{ form.adresse_livraison.errors.0 }}</span>{% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- CHAMPS TRANSPORTEUR -->
+        <div class="role-fields" data-role-fields="transporteur">
+          <div style="background:var(--transporteur-soft); border:1px solid rgba(0,110,255,0.2); border-radius:var(--r-md); padding:var(--sp-4); margin-bottom:var(--sp-4);">
+            <div style="font-family:var(--font-mono); font-size:10px; letter-spacing:0.12em; text-transform:uppercase; color:var(--transporteur-dark); margin-bottom:var(--sp-3);">Informations transporteur</div>
+            <p style="font-size:13px; color:var(--ink-soft); margin:0;">Vous pourrez ajouter votre véhicule et vos zones de couverture depuis votre tableau de bord après l'inscription.</p>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="id_password1">Mot de passe</label>
+            <div class="password-wrap">
+              <input type="password" name="password1" id="id_password1"
+                class="input{% if form.password1.errors %} has-error{% endif %}"
+                placeholder="••••••••"
+                required>
+              <button type="button" class="password-toggle" data-toggle-for="id_password1">Afficher</button>
+            </div>
+            {% if form.password1.errors %}<span class="field-error">{{ form.password1.errors.0 }}</span>{% endif %}
+          </div>
+          <div class="field">
+            <label for="id_password2">Confirmer</label>
+            <div class="password-wrap">
+              <input type="password" name="password2" id="id_password2"
+                class="input{% if form.password2.errors %} has-error{% endif %}"
+                placeholder="••••••••"
+                required>
+              <button type="button" class="password-toggle" data-toggle-for="id_password2">Afficher</button>
+            </div>
+            {% if form.password2.errors %}<span class="field-error">{{ form.password2.errors.0 }}</span>{% endif %}
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-lemon btn-block btn-lg">
+          Créer mon compte →
+        </button>
+
+        <p style="font-size:11px; color:var(--ink-faint); text-align:center; margin-top:var(--sp-3);">
+          En créant un compte, vous acceptez nos <a href="#" style="color:var(--lemon-dark);">conditions d'utilisation</a>.
+        </p>
+      </form>
+
+      <p class="auth-switch">
+        Déjà inscrit ?
+        <a href="{% url 'connexion' %}">Se connecter</a>
+      </p>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

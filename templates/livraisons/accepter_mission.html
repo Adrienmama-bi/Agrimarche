@@ -1,0 +1,67 @@
+{% extends 'base_auth.html' %}
+{% load static %}
+{% block title %}Accepter la mission #{{ livraison.pk }} — AgriMarché{% endblock %}
+
+{% block content %}
+<div style="min-height:100vh; display:flex; align-items:center; justify-content:center; background:var(--bg-soft); padding:var(--sp-5);">
+  <div style="background:var(--white); border-radius:var(--r-lg); padding:var(--sp-7); max-width:520px; width:100%; box-shadow:var(--shadow-lg);">
+
+    <a href="{% url 'missions_disponibles' %}" style="font-size:13px; color:var(--ink-faint); display:inline-block; margin-bottom:var(--sp-5);">← Retour aux missions</a>
+
+    <h2 style="font-size:24px; margin-bottom:var(--sp-2);">Accepter la mission #{{ livraison.pk }}</h2>
+    <p style="color:var(--ink-soft); font-size:14px; margin-bottom:var(--sp-6);">
+      Confirmez les détails avant de démarrer.
+    </p>
+
+    <div style="background:var(--bg-soft); border-radius:var(--r-md); padding:var(--sp-4); margin-bottom:var(--sp-6);">
+      <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:13px;">
+        <span style="color:var(--ink-faint);">Départ</span>
+        <span style="font-weight:600;">🌾 {{ livraison.commande.agriculteur.localisation }}</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; font-size:13px;">
+        <span style="color:var(--ink-faint);">Arrivée</span>
+        <span style="font-weight:600;">📍 {{ livraison.commande.adresse_livraison }}</span>
+      </div>
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+
+      {% if vehicules %}
+      <div class="field">
+        <label>Véhicule à utiliser</label>
+        <select name="vehicule" class="input">
+          <option value="">Choisir un véhicule</option>
+          {% for v in vehicules %}
+          <option value="{{ v.pk }}">{{ v.get_type_vehicule_display }} — {{ v.immatriculation }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      {% else %}
+      <div style="background:var(--lemon-soft); border-radius:var(--r-md); padding:var(--sp-3) var(--sp-4); margin-bottom:var(--sp-4); font-size:13px;">
+        Vous n'avez pas encore enregistré de véhicule. Vous pouvez accepter cette mission sans en préciser un pour l'instant.
+      </div>
+      {% endif %}
+
+      <div class="field-row">
+        <div class="field">
+          <label>Distance estimée (km)</label>
+          <input type="number" name="distance_km" class="input" step="0.1" placeholder="Ex : 12.5">
+        </div>
+        <div class="field">
+          <label>Tarif de transport (CDF)</label>
+          <input type="number" name="tarif" class="input" step="0.01" placeholder="Ex : 5000">
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-lemon btn-block btn-lg" style="margin-top:var(--sp-3);">
+        ✓ Confirmer et démarrer la mission
+      </button>
+      <a href="{% url 'missions_disponibles' %}" class="btn btn-ghost btn-block" style="margin-top:var(--sp-3);">
+        Annuler
+      </a>
+    </form>
+
+  </div>
+</div>
+{% endblock %}

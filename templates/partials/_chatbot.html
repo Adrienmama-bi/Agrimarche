@@ -1,0 +1,225 @@
+{% if user.is_authenticated %}
+<div id="chatbot-widget">
+
+  <button id="chatbot-toggle" aria-label="Ouvrir l'assistant">
+    <span id="chatbot-icon-closed">💬</span>
+    <span id="chatbot-icon-open" style="display:none;">✕</span>
+  </button>
+
+  <div id="chatbot-panel">
+    <div id="chatbot-header">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <div style="width:32px; height:32px; border-radius:50%; background:var(--lemon); display:flex; align-items:center; justify-content:center; font-size:16px;">🌿</div>
+        <div>
+          <div style="font-weight:700; font-size:14px; color:var(--white);">Assistant AgriMarché</div>
+          <div style="font-size:11px; color:rgba(255,255,255,0.5);">Toujours disponible</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="chatbot-messages"></div>
+
+    <div id="chatbot-typing" style="display:none;">
+      <span></span><span></span><span></span>
+    </div>
+
+    <form id="chatbot-form">
+      <input type="text" id="chatbot-input" placeholder="Posez votre question..." autocomplete="off">
+      <button type="submit">→</button>
+    </form>
+  </div>
+
+</div>
+
+<style>
+#chatbot-widget {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1000;
+  font-family: var(--font-body);
+}
+#chatbot-toggle {
+  width: 58px; height: 58px;
+  border-radius: 50%;
+  background: var(--lemon);
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: var(--shadow-lg);
+  display: flex; align-items: center; justify-content: center;
+  transition: transform .2s var(--ease);
+}
+#chatbot-toggle:hover { transform: scale(1.06); }
+
+#chatbot-panel {
+  display: none;
+  position: absolute;
+  bottom: 72px;
+  right: 0;
+  width: 360px;
+  height: 480px;
+  background: var(--white);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  flex-direction: column;
+}
+#chatbot-panel.is-open { display: flex; }
+
+#chatbot-header {
+  background: var(--soil);
+  padding: 14px 18px;
+}
+
+#chatbot-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #F6FBF0;
+}
+.chatbot-msg {
+  max-width: 80%;
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+.chatbot-msg.user {
+  align-self: flex-end;
+  background: var(--lemon);
+  color: var(--soil);
+  border-bottom-right-radius: 4px;
+}
+.chatbot-msg.assistant {
+  align-self: flex-start;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-bottom-left-radius: 4px;
+}
+
+#chatbot-typing {
+  padding: 0 16px 10px;
+  display: flex;
+  gap: 4px;
+}
+#chatbot-typing span {
+  width: 6px; height: 6px;
+  background: var(--ink-faint);
+  border-radius: 50%;
+  animation: chatbot-bounce 1.2s infinite;
+}
+#chatbot-typing span:nth-child(2) { animation-delay: .15s; }
+#chatbot-typing span:nth-child(3) { animation-delay: .3s; }
+@keyframes chatbot-bounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: .4; }
+  30% { transform: translateY(-4px); opacity: 1; }
+}
+
+#chatbot-form {
+  display: flex;
+  border-top: 1px solid var(--line);
+  padding: 10px;
+  gap: 8px;
+}
+#chatbot-input {
+  flex: 1;
+  border: 1.5px solid var(--line);
+  border-radius: var(--r-md);
+  padding: 10px 14px;
+  font-size: 13.5px;
+  outline: none;
+}
+#chatbot-input:focus { border-color: var(--lemon-dark); }
+#chatbot-form button {
+  background: var(--lemon);
+  border: none;
+  border-radius: var(--r-md);
+  width: 40px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+@media (max-width: 480px) {
+  #chatbot-panel { width: calc(100vw - 32px); right: -8px; }
+}
+</style>
+
+<script>
+(function() {
+  const toggle = document.getElementById('chatbot-toggle');
+  const panel = document.getElementById('chatbot-panel');
+  const iconClosed = document.getElementById('chatbot-icon-closed');
+  const iconOpen = document.getElementById('chatbot-icon-open');
+  const messagesZone = document.getElementById('chatbot-messages');
+  const form = document.getElementById('chatbot-form');
+  const input = document.getElementById('chatbot-input');
+  const typing = document.getElementById('chatbot-typing');
+
+  let dejaCharge = false;
+
+  function ajouterMessage(role, contenu) {
+    const div = document.createElement('div');
+    div.className = 'chatbot-msg ' + role;
+    div.textContent = contenu;
+    messagesZone.appendChild(div);
+    messagesZone.scrollTop = messagesZone.scrollHeight;
+  }
+
+  toggle.addEventListener('click', function() {
+    const isOpen = panel.classList.toggle('is-open');
+    iconClosed.style.display = isOpen ? 'none' : 'inline';
+    iconOpen.style.display = isOpen ? 'inline' : 'none';
+
+    if (isOpen && !dejaCharge) {
+      dejaCharge = true;
+      fetch("{% url 'chat_widget_data' %}")
+        .then(r => r.json())
+        .then(data => {
+          if (data.messages.length === 0) {
+            ajouterMessage('assistant', "Bonjour ! Je suis l'assistant AgriMarché 🌿 Comment puis-je vous aider aujourd'hui ?");
+          } else {
+            data.messages.forEach(m => ajouterMessage(m.role, m.contenu));
+          }
+        });
+    }
+  });
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const texte = input.value.trim();
+    if (!texte) return;
+
+    ajouterMessage('user', texte);
+    input.value = '';
+    typing.style.display = 'flex';
+    messagesZone.scrollTop = messagesZone.scrollHeight;
+
+    fetch("{% url 'envoyer_message_chat' %}", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': '{{ csrf_token }}',
+      },
+      body: JSON.stringify({ message: texte }),
+    })
+      .then(r => r.json())
+      .then(data => {
+        typing.style.display = 'none';
+        if (data.ok) {
+          ajouterMessage('assistant', data.reponse);
+        } else {
+          ajouterMessage('assistant', data.erreur || "Une erreur est survenue.");
+        }
+      })
+      .catch(() => {
+        typing.style.display = 'none';
+        ajouterMessage('assistant', "Connexion impossible. Réessayez.");
+      });
+  });
+})();
+</script>
+{% endif %}

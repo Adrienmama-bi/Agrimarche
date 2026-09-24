@@ -1,0 +1,262 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}AgriMarché — Du champ à votre porte{% endblock %}
+
+{% block content %}
+
+<!-- ========== HERO ========== -->
+<section class="hero-new">
+  <div class="hero-overlay"></div>
+  <div class="hero-content container">
+    <div class="hero-left-block">
+    <h1 class="hero-title">
+      Du champ directement<br>
+      <span class="hero-title-accent">à votre porte.</span>
+    </h1>
+    <p class="hero-desc">AgriMarché connecte agriculteurs, acheteurs et transporteurs sur une seule plateforme. Achetez frais, vendez mieux, livrez sans friction.</p>
+    <div class="hero-actions">
+      <a href="{% url 'inscription' %}" class="btn btn-lemon btn-lg">Commencer gratuitement</a>
+      <a href="#comment-ca-marche" class="btn btn-ghost-light btn-lg">Comment ça marche</a>
+    </div>
+  </div>
+    <!-- BLOC DROIT : CARTE ROUTE -->
+      <div class="hero-right-block">
+        <div class="route">
+          <span class="route-title">Suivi de commande — en direct</span>
+          <div class="route-track">
+            <div class="route-node">
+              <div class="icon">🌱</div>
+              <span class="label">Ferme</span>
+            </div>
+            <div class="route-path"><span class="truck">🚚</span></div>
+            <div class="route-node">
+              <div class="icon">📦</div>
+              <span class="label">Marché</span>
+            </div>
+            <div class="route-path"><span class="truck">🚚</span></div>
+            <div class="route-node">
+              <div class="icon">🏠</div>
+              <span class="label">Porte</span>
+            </div>
+          </div>
+          <div class="route-meta">
+            <span>Distance estimée</span>
+            <strong>12,4 km</strong>
+          </div>
+          <div style="margin-top:var(--sp-5); padding-top:var(--sp-4); border-top:1px solid rgba(122,230,0,0.12);">
+            <div style="display:flex; justify-content:space-between; font-family:var(--font-mono); font-size:11px; color:rgba(234,247,194,0.5); margin-bottom:var(--sp-3);">
+              <span>Statut</span>
+              <span style="color:var(--lemon);">● En route</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-family:var(--font-mono); font-size:11px; color:rgba(234,247,194,0.5); margin-bottom:var(--sp-3);">
+              <span>Transporteur</span>
+              <span style="color:rgba(234,247,194,0.8);">Jean K.</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-family:var(--font-mono); font-size:11px; color:rgba(234,247,194,0.5);">
+              <span>Arrivée estimée</span>
+              <strong style="color:var(--lemon);">14h30</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+  </div>
+  <!-- Scroll indicator -->
+  <div class="hero-scroll">
+    <span>Défiler</span>
+    <div class="hero-scroll-line"></div>
+  </div>
+</section>
+
+<!-- ========== TICKER ========== -->
+<div class="ticker">
+  <div class="ticker-track">
+    <span class="ticker-item">🌽 MAÏS <span class="up">▲</span> 450 CDF/KG</span>
+    <span class="ticker-item">🍠 MANIOC 300 CDF/KG</span>
+    <span class="ticker-item">🍅 TOMATE <span class="down">▼</span> 800 CDF/KG</span>
+    <span class="ticker-item">🫘 HARICOT <span class="up">▲</span> 600 CDF/KG</span>
+    <span class="ticker-item">🍌 BANANE PLANTAIN 350 CDF/KG</span>
+    <span class="ticker-item">🥬 LÉGUMES FRAIS 250 CDF/KG</span>
+    <span class="ticker-item">🌽 MAÏS <span class="up">▲</span> 450 CDF/KG</span>
+    <span class="ticker-item">🍠 MANIOC 300 CDF/KG</span>
+    <span class="ticker-item">🍅 TOMATE <span class="down">▼</span> 800 CDF/KG</span>
+    <span class="ticker-item">🫘 HARICOT <span class="up">▲</span> 600 CDF/KG</span>
+    <span class="ticker-item">🍌 BANANE PLANTAIN 350 CDF/KG</span>
+    <span class="ticker-item">🥬 LÉGUMES FRAIS 250 CDF/KG</span>
+  </div>
+</div>
+
+<!-- ========== 3 ACTEURS ========== -->
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">Trois acteurs, une seule plateforme</span>
+      <h2 style="margin-top:var(--sp-3);">Choisissez votre rôle</h2>
+    </div>
+    <div class="actors-grid">
+      <div class="actor-card actor-agri">
+        <div class="actor-num">01</div>
+        <div class="actor-icon">🌾</div>
+        <h3>Agriculteur</h3>
+        <p>Publiez votre récolte, recevez des commandes et choisissez votre transporteur. Zéro intermédiaire, plus de revenus.</p>
+        <a href="{% url 'inscription' %}?role=agriculteur" class="actor-link">Devenir vendeur <span>→</span></a>
+      </div>
+      <div class="actor-card actor-buy">
+        <div class="actor-num">02</div>
+        <div class="actor-icon">🛒</div>
+        <h3>Acheteur</h3>
+        <p>Commandez des produits frais directement auprès des producteurs de votre région et suivez votre livraison en temps réel.</p>
+        <a href="{% url 'inscription' %}?role=acheteur" class="actor-link">Commencer mes achats <span>→</span></a>
+      </div>
+      <div class="actor-card actor-trans">
+        <div class="actor-num">03</div>
+        <div class="actor-icon">🚛</div>
+        <h3>Transporteur</h3>
+        <p>Consultez les missions disponibles près de vous, acceptez celles qui vous conviennent et gérez votre planning librement.</p>
+        <a href="{% url 'inscription' %}?role=transporteur" class="actor-link">Devenir transporteur <span>→</span></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== COMMENT ÇA MARCHE ========== -->
+<section class="section bg-soil" id="comment-ca-marche">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow" style="color:var(--lemon);">Le processus</span>
+      <h2 style="margin-top:var(--sp-3); color:var(--white);">Comment ça marche</h2>
+    </div>
+    <div class="how-grid">
+      <div class="how-step">
+        <div class="how-step-num">01</div>
+        <div class="how-step-icon">📸</div>
+        <h3>Publier la récolte</h3>
+        <p>L'agriculteur publie son produit avec photo, prix, quantité disponible et date de récolte.</p>
+      </div>
+      <div class="how-arrow">→</div>
+      <div class="how-step">
+        <div class="how-step-num">02</div>
+        <div class="how-step-icon">💳</div>
+        <h3>Commander et payer</h3>
+        <p>L'acheteur commande et paie en ligne via Mobile Money, carte ou virement sécurisé.</p>
+      </div>
+      <div class="how-arrow">→</div>
+      <div class="how-step">
+        <div class="how-step-num">03</div>
+        <div class="how-step-icon">🚚</div>
+        <h3>Assigner un transporteur</h3>
+        <p>Un transporteur nearby accepte la mission, récupère la marchandise et démarre la livraison.</p>
+      </div>
+      <div class="how-arrow">→</div>
+      <div class="how-step">
+        <div class="how-step-num">04</div>
+        <div class="how-step-icon">📍</div>
+        <h3>Suivre en direct</h3>
+        <p>L'acheteur suit sa commande en temps réel sur la carte jusqu'à sa porte.</p>
+      </div>
+    </div>
+  </div>
+</section>
+{% if recommandations %}
+<section class="section" style="padding-bottom:0;">
+  <div class="container">
+    <div style="display:flex; align-items:center; gap:var(--sp-2); margin-bottom:var(--sp-2);">
+      <span class="eyebrow" style="margin:0;">Spécialement pour vous</span>
+      <span style="font-family:var(--font-mono); font-size:9px; letter-spacing:0.1em; text-transform:uppercase; background:var(--soil); color:var(--lemon); padding:2px 8px; border-radius:var(--r-full);">✨ IA</span>
+    </div>
+    <h2 style="margin-top:var(--sp-2);">Vos recommandations</h2>
+    <div class="produce-grid">
+      {% for produit, raison in recommandations %}
+      <a href="{% url 'detail_produit' produit.pk %}" class="produce-card" style="text-decoration:none; display:block;">
+        <div class="produce-media">
+          {% with photo=produit.photos.first %}
+            {% if photo %}<img src="{{ photo.image.url }}" alt="{{ produit.nom }}">
+            {% else %}<div class="produce-placeholder">🌿</div>{% endif %}
+          {% endwith %}
+          {% if produit.est_bio %}<span class="badge-bio">BIO</span>{% endif %}
+        </div>
+        <div class="produce-body">
+          <p class="produce-farmer">🌾 {{ produit.agriculteur.utilisateur.get_full_name }}</p>
+          <h3 class="produce-name">{{ produit.nom }}</h3>
+          <p class="produce-price" style="margin-top:6px;"><span class="mono">{{ produit.prix_unitaire }} CDF</span> / {{ produit.get_unite_display }}</p>
+          {% if raison %}<div style="font-size:11px; color:var(--lemon-dark); font-style:italic; margin-top:6px;">✨ {{ raison }}</div>{% endif %}
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+<!-- ========== PRODUITS RÉCENTS ========== -->
+<section class="section" id="produits">
+  <div class="container">
+    <div class="section-head" style="display:flex; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; gap:var(--sp-4);">
+      <div>
+        <span class="eyebrow">Fraîchement récoltés</span>
+        <h2 style="margin-top:var(--sp-3);">Produits du moment</h2>
+      </div>
+      <a href="{% url 'catalogue' %}" class="btn btn-ghost">Voir tout le catalogue →</a>
+    </div>
+    <div class="produce-grid">
+      {% for produit in produits_recents %}
+      <article class="produce-card">
+        <div class="produce-media">
+          {% with photo=produit.photos.first %}
+            {% if photo %}
+              <img src="{{ photo.image.url }}" alt="{{ produit.nom }}">
+            {% else %}
+              <div class="produce-placeholder">🌿</div>
+            {% endif %}
+          {% endwith %}
+          {% if produit.est_bio %}<span class="badge-bio">BIO</span>{% endif %}
+        </div>
+        <div class="produce-body">
+          <p class="produce-farmer">🌾 {{ produit.agriculteur.utilisateur.get_full_name }}</p>
+          <h3 class="produce-name">{{ produit.nom }}</h3>
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-top:var(--sp-3);">
+            <span class="produce-price"><span class="mono">{{ produit.prix_unitaire }} CDF</span> / {{ produit.get_unite_display }}</span>
+            <a href="#" class="btn btn-lemon" style="padding:8px 16px; font-size:13px;">Commander</a>
+          </div>
+        </div>
+      </article>
+      {% empty %}
+      <div class="empty-state">
+        Les premières récoltes arrivent bientôt.
+        <a href="{% url 'inscription' %}?role=agriculteur" style="color:var(--lemon-dark); font-weight:700;">Publiez la vôtre</a>.
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ========== CTA FINAL ========== -->
+<section class="section">
+  <div class="container">
+    <div class="cta-final">
+      <div class="cta-final-left">
+        <span class="eyebrow" style="color:var(--lemon);">Rejoindre AgriMarché</span>
+        <h2 style="color:var(--white); margin-top:var(--sp-3);">Prêt à transformer votre façon de vendre et d'acheter agricole ?</h2>
+        <p style="color:rgba(255,255,255,0.55); margin-top:var(--sp-4); font-size:15px;">Inscription gratuite, en moins de deux minutes. Aucune carte bancaire requise.</p>
+        <div style="display:flex; gap:var(--sp-3); margin-top:var(--sp-6); flex-wrap:wrap;">
+          <a href="{% url 'inscription' %}?role=agriculteur" class="btn btn-lemon btn-lg">Je suis agriculteur</a>
+          <a href="{% url 'inscription' %}?role=acheteur" class="btn btn-ghost-light btn-lg">Je veux acheter</a>
+        </div>
+      </div>
+      <div class="cta-final-logo">
+        <svg width="180" height="180" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="18" cy="18" r="18" fill="rgba(122,230,0,0.12)"/>
+          <path d="M18 4 C8 9 6 22 11 32 C13.5 27 16 22 18 19 C20 22 22.5 27 25 32 C30 22 28 9 18 4Z" fill="#7AE600"/>
+          <line x1="18" y1="7" x2="18" y2="30" stroke="#0B1F0E" stroke-width="1.4" stroke-linecap="round"/>
+          <line x1="18" y1="12" x2="12" y2="17" stroke="#0B1F0E" stroke-width="1" stroke-linecap="round"/>
+          <line x1="18" y1="17" x2="12" y2="22" stroke="#0B1F0E" stroke-width="1" stroke-linecap="round"/>
+          <line x1="18" y1="22" x2="13" y2="26" stroke="#0B1F0E" stroke-width="1" stroke-linecap="round"/>
+          <line x1="18" y1="12" x2="24" y2="17" stroke="#0B1F0E" stroke-width="1" stroke-linecap="round"/>
+          <line x1="18" y1="17" x2="24" y2="22" stroke="#0B1F0E" stroke-width="1" stroke-linecap="round"/>
+          <line x1="18" y1="22" x2="23" y2="26" stroke="#0B1F0E" stroke-width="1" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

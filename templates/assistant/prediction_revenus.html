@@ -1,0 +1,189 @@
+{% extends 'base_auth.html' %}
+{% load static %}
+{% block title %}Prédiction de revenus — AgriMarché{% endblock %}
+
+{% block content %}
+<div class="dash-shell">
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <svg width="30" height="30" viewBox="0 0 36 36" fill="none">
+        <circle cx="18" cy="18" r="18" fill="#0B1F0E"/>
+        <path d="M18 6 C10 10 8 20 12 28 C14 24 16 20 18 18 C20 20 22 24 24 28 C28 20 26 10 18 6Z" fill="#7AE600"/>
+      </svg>
+      <span class="sidebar-brand-text">Agri<span>Marché</span></span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="{% url 'dashboard' %}" class="sidebar-link"><span class="icon">🏠</span> Tableau de bord</a>
+      <a href="{% url 'prediction_revenus' %}" class="sidebar-link is-active"><span class="icon">📈</span> Prédiction revenus</a>
+      <a href="{% url 'demande_categorie' %}" class="sidebar-link"><span class="icon">📊</span> Demande marché</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <a href="{% url 'deconnexion' %}" class="sidebar-logout"><span class="icon">🚪</span> Déconnexion</a>
+    </div>
+  </aside>
+
+  <div class="dash-main">
+    <div class="dash-topbar">
+      <div>
+        <div class="dash-topbar-title">📈 Prédiction de revenus</div>
+        <div style="font-size:12px; color:var(--ink-faint);">Estimez vos revenus futurs grâce à l'IA</div>
+      </div>
+    </div>
+
+    <div class="dash-body">
+
+      <!-- Formulaire -->
+      <div class="dash-card" style="padding:var(--sp-6); margin-bottom:var(--sp-5);">
+        <form method="post">
+          {% csrf_token %}
+          <div class="field-row" style="align-items:flex-end;">
+            <div class="field" style="flex:2;">
+              <label>Choisissez un produit</label>
+              <select name="produit_id" class="input" required>
+                <option value="">-- Sélectionner --</option>
+                {% for p in produits %}
+                <option value="{{ p.pk }}" {% if produit_selectionne.pk == p.pk %}selected{% endif %}>
+                  {{ p.nom }} — {{ p.prix_unitaire }} CFA/{{ p.get_unite_display }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="field" style="flex:1;">
+              <label>Horizon de prédiction</label>
+              <select name="nb_mois" class="input">
+                <option value="3">3 mois</option>
+                <option value="6" selected>6 mois</option>
+                <option value="12">12 mois</option>
+              </select>
+            </div>
+            <div class="field" style="flex:0 0 auto; margin-bottom:0;">
+              <button type="submit" class="btn btn-lemon btn-lg">Analyser →</button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      {% if resultat %}
+
+      <!-- Résumé global -->
+      <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:var(--sp-4); margin-bottom:var(--sp-5);">
+        <div class="dash-card" style="padding:var(--sp-5); border-top:3px solid var(--danger);">
+          <div style="font-size:11px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:1px;">Scénario pessimiste</div>
+          <div style="font-size:26px; font-weight:800; color:var(--danger); margin-top:6px;">{{ resultat.total_pessimiste|floatformat:0 }} CFA</div>
+          <div style="font-size:12px; color:var(--ink-faint);">sur {{ resultat.nb_mois }} mois</div>
+        </div>
+        <div class="dash-card" style="padding:var(--sp-5); border-top:3px solid var(--lemon); box-shadow:var(--shadow-md);">
+          <div style="font-size:11px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:1px;">Scénario réaliste</div>
+          <div style="font-size:26px; font-weight:800; color:var(--lemon-dark); margin-top:6px;">{{ resultat.total_realiste|floatformat:0 }} CFA</div>
+          <div style="font-size:12px; color:var(--ink-faint);">sur {{ resultat.nb_mois }} mois</div>
+        </div>
+        <div class="dash-card" style="padding:var(--sp-5); border-top:3px solid var(--success);">
+          <div style="font-size:11px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:1px;">Scénario optimiste</div>
+          <div style="font-size:26px; font-weight:800; color:var(--success); margin-top:6px;">{{ resultat.total_optimiste|floatformat:0 }} CFA</div>
+          <div style="font-size:12px; color:var(--ink-faint);">sur {{ resultat.nb_mois }} mois</div>
+        </div>
+      </div>
+
+      <!-- Graphique en barres -->
+      <div class="dash-card" style="padding:var(--sp-6); margin-bottom:var(--sp-5);">
+        <h3 style="font-size:16px; margin-bottom:var(--sp-5);">Revenus nets estimés par mois</h3>
+        <div style="display:flex; align-items:flex-end; gap:var(--sp-3); height:180px;">
+          {% for pred in resultat.predictions %}
+          {% with max_rev=resultat.total_optimiste %}
+          <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:6px;">
+            <!-- Barre optimiste -->
+            <div style="width:100%; position:relative; height:150px; display:flex; align-items:flex-end; gap:2px;">
+              <div style="flex:1; background:var(--success-soft); border-radius:4px 4px 0 0; height:{{ pred.revenu_optimiste|default:0 }}px;" title="Optimiste : {{ pred.revenu_optimiste }} CFA"></div>
+              <div style="flex:1; background:var(--lemon); border-radius:4px 4px 0 0; height:{{ pred.revenu_net_realiste }}px;" title="Réaliste : {{ pred.revenu_net_realiste }} CFA"></div>
+              <div style="flex:1; background:var(--danger-soft); border-radius:4px 4px 0 0; height:{{ pred.revenu_pessimiste }}px;" title="Pessimiste : {{ pred.revenu_pessimiste }} CFA"></div>
+            </div>
+            <div style="font-size:11px; font-weight:700; color:var(--ink-soft);">{{ pred.mois }}</div>
+            <div style="font-size:10px; color:var(--ink-faint);">{{ pred.revenu_net_realiste|floatformat:0 }}</div>
+          </div>
+          {% endwith %}
+          {% endfor %}
+        </div>
+        <!-- Légende -->
+        <div style="display:flex; gap:var(--sp-4); margin-top:var(--sp-4); justify-content:center;">
+          <span style="display:flex; align-items:center; gap:6px; font-size:12px;"><span style="width:12px; height:12px; background:var(--success-soft); border-radius:3px; display:inline-block;"></span>Optimiste</span>
+          <span style="display:flex; align-items:center; gap:6px; font-size:12px;"><span style="width:12px; height:12px; background:var(--lemon); border-radius:3px; display:inline-block;"></span>Réaliste</span>
+          <span style="display:flex; align-items:center; gap:6px; font-size:12px;"><span style="width:12px; height:12px; background:var(--danger-soft); border-radius:3px; display:inline-block;"></span>Pessimiste</span>
+        </div>
+      </div>
+
+      <!-- Tableau détaillé -->
+      <div class="dash-card" style="margin-bottom:var(--sp-5);">
+        <div class="dash-card-head">
+          <span class="dash-card-title">Détail mois par mois</span>
+          <span style="font-size:12px; color:var(--ink-faint);">Commission {{ resultat.commission }}% déduite</span>
+        </div>
+        <table class="dash-table">
+          <thead>
+            <tr>
+              <th>Mois</th>
+              <th>Qté estimée</th>
+              <th>Revenu brut</th>
+              <th>Commission</th>
+              <th>Revenu net</th>
+              <th>Saisonnalité</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for pred in resultat.predictions %}
+            <tr>
+              <td><strong>{{ pred.mois }} {{ pred.annee }}</strong></td>
+              <td>{{ pred.qte_estimee }}</td>
+              <td>{{ pred.revenu_brut_realiste|floatformat:0 }} CFA</td>
+              <td style="color:var(--ink-faint);">{{ pred.revenu_brut_realiste|floatformat:0|add:"-"|add:pred.revenu_net_realiste }} CFA</td>
+              <td><strong style="color:var(--lemon-dark);">{{ pred.revenu_net_realiste|floatformat:0 }} CFA</strong></td>
+              <td>
+                {% if pred.coeff_saison >= 1.10 %}
+                <span class="status-badge status-validee">↑ Haute</span>
+                {% elif pred.coeff_saison <= 0.90 %}
+                <span class="status-badge status-annulee">↓ Basse</span>
+                {% else %}
+                <span class="status-badge status-attente">→ Normale</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Conseils IA -->
+      <div class="dash-card" style="padding:var(--sp-6);">
+        <h3 style="font-size:16px; margin-bottom:var(--sp-4);">💡 Conseils personnalisés</h3>
+        <div style="display:flex; flex-direction:column; gap:var(--sp-3);">
+          {% for conseil in resultat.conseils %}
+          <div style="background:var(--bg-soft); border-radius:var(--r-md); padding:var(--sp-4); border-left:3px solid var(--lemon); font-size:14px; line-height:1.6;">
+            {{ conseil|safe }}
+          </div>
+          {% endfor %}
+        </div>
+        <div style="margin-top:var(--sp-4); padding:var(--sp-4); background:var(--line); border-radius:var(--r-md);">
+          <p style="font-size:12px; color:var(--ink-faint); margin:0;">
+            ⚠️ Ces prédictions sont basées sur l'historique de ventes de la plateforme et les tendances saisonnières camerounaises.
+            Elles sont indicatives et ne constituent pas une garantie de revenus.
+          </p>
+        </div>
+      </div>
+
+      {% else %}
+      <!-- État vide -->
+      <div style="text-align:center; padding:var(--sp-10) var(--sp-5);">
+        <div style="font-size:64px; margin-bottom:var(--sp-5);">📈</div>
+        <h2 style="font-size:24px; margin-bottom:var(--sp-3);">Prédisez vos revenus</h2>
+        <p style="color:var(--ink-soft); max-width:400px; margin:0 auto;">
+          Choisissez un produit dans le formulaire ci-dessus et notre algorithme analysera
+          la saisonnalité, les tendances du marché et votre historique de ventes pour
+          estimer vos revenus sur 3, 6 ou 12 mois.
+        </p>
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+{% endblock %}

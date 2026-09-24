@@ -1,0 +1,213 @@
+{% extends 'base_auth.html' %}
+{% load static %}
+{% block title %}Mon espace — AgriMarché{% endblock %}
+
+{% block content %}
+<div class="dash-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <svg width="30" height="30" viewBox="0 0 36 36" fill="none">
+        <circle cx="18" cy="18" r="18" fill="#0B1F0E"/>
+        <path d="M18 6 C10 10 8 20 12 28 C14 24 16 20 18 18 C20 20 22 24 24 28 C28 20 26 10 18 6Z" fill="#7AE600"/>
+        <line x1="18" y1="8" x2="18" y2="27" stroke="#0B1F0E" stroke-width="1.2" stroke-linecap="round"/>
+        <line x1="18" y1="13" x2="13" y2="17" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+        <line x1="18" y1="17" x2="13" y2="21" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+        <line x1="18" y1="13" x2="23" y2="17" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+        <line x1="18" y1="17" x2="23" y2="21" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+      </svg>
+      <span class="sidebar-brand-text">Agri<span>Marché</span></span>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="sidebar-user-avatar" style="background:var(--acheteur);">
+        {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
+      </div>
+      <div class="sidebar-user-name">{{ request.user.get_full_name }}</div>
+      <span class="sidebar-user-role role-badge-acheteur">Acheteur</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <span class="sidebar-section-label">Principal</span>
+      <a href="{% url 'dashboard_acheteur' %}" class="sidebar-link is-active">
+        <span class="icon">🏠</span> Tableau de bord
+      </a>
+      <a href="{% url 'catalogue' %}" class="sidebar-link">
+        <span class="icon">🛒</span> Catalogue
+      </a>
+      <a href="{% url 'mes_commandes' %}" class="sidebar-link">
+        <span class="icon">📦</span> Mes commandes
+        {% if en_livraison %}<span class="badge">{{ en_livraison }}</span>{% endif %}
+      </a>
+      <a href="{% url 'mes_commandes' %}" class="sidebar-link">
+        <span class="icon">📍</span> Suivi livraison
+      </a>
+      <a href="{% url 'carte_catalogue' %}" class="sidebar-link">
+  <span class="icon">🗺️</span> Carte des produits
+</a>
+<a href="{% url 'produits_proches' %}" class="sidebar-link">
+  <span class="icon">📍</span> Produits proches
+</a>
+    
+      <span class="sidebar-section-label" style="margin-top:var(--sp-3);">Compte</span>
+      <a href="{% url 'mon_profil' %}" class="sidebar-link">
+  <span class="icon">👤</span> Mon profil
+</a>
+  <a href="{% url 'mes_paiements' %}" class="sidebar-link">
+        <span class="icon">💳</span> Paiements
+      </a>
+      <a href="{% url 'boite_reception'%}" class="sidebar-link">
+        <span class="icon">💬</span> Messagerie
+      </a>
+     
+    </nav>
+
+    <div class="sidebar-bottom">
+      <a href="{% url 'deconnexion' %}" class="sidebar-logout">
+        <span class="icon">🚪</span> Déconnexion
+      </a>
+    </div>
+  </aside>
+
+  <!-- CONTENU PRINCIPAL -->
+  <div class="dash-main">
+
+    <!-- TOPBAR -->
+    <div class="dash-topbar">
+      <div>
+        <div class="dash-topbar-title">Bonjour, {{ request.user.first_name }} 👋</div>
+        <div style="font-size:12px; color:var(--ink-faint); margin-top:2px;">Bienvenue sur votre espace acheteur</div>
+      </div>
+      <div class="dash-topbar-right">
+        <a href="{% url 'liste_notifications' %}" class="dash-notif-btn" style="text-decoration:none; position:relative;">
+  🔔
+  {% if nb_notifications_non_lues > 0 %}
+  <span class="dash-notif-dot"></span>
+  {% endif %}
+</a>
+        <a href="{% url 'catalogue' %}" class="btn btn-lemon" style="padding:10px 20px; font-size:14px;">🛒 Commander</a>
+      </div>
+    </div>
+
+    <div class="dash-body">
+
+      <!-- STATS -->
+      <div class="stat-grid">
+        <div class="stat-card stat-orange">
+          <span class="stat-card-label">Total commandes</span>
+          <div class="stat-card-value">{{ total_commandes }}</div>
+          <div class="stat-card-sub">Depuis votre inscription</div>
+          <span class="stat-card-icon">📦</span>
+        </div>
+        <div class="stat-card stat-lemon">
+          <span class="stat-card-label">En livraison</span>
+          <div class="stat-card-value">{{ en_livraison }}</div>
+          <div class="stat-card-sub">Commandes en cours</div>
+          <span class="stat-card-icon">🚚</span>
+        </div>
+        <div class="stat-card stat-green">
+          <span class="stat-card-label">Livrées</span>
+          <div class="stat-card-value">{{ total_livrees|default:"0" }}</div>
+          <div class="stat-card-sub">Commandes reçues</div>
+          <span class="stat-card-icon">✅</span>
+        </div>
+        <div class="stat-card stat-blue">
+          <span class="stat-card-label">Adresse livraison</span>
+          <div style="font-size:14px; font-weight:600; color:var(--soil); margin-top:var(--sp-2);">{{ profil.adresse_livraison|default:"Non définie" }}</div>
+          <span class="stat-card-icon">📍</span>
+        </div>
+      </div>
+
+      <!-- COMMANDES RÉCENTES -->
+      <div class="dash-card">
+        <div class="dash-card-head">
+          <span class="dash-card-title">Mes commandes récentes</span>
+          <a href="#" class="dash-card-link">Voir toutes →</a>
+        </div>
+        <table class="dash-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Agriculteur</th>
+              <th>Date</th>
+              <th>Montant</th>
+              <th>Statut</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for commande in commandes_recentes %}
+            <tr>
+              <td><span style="font-family:var(--font-mono); font-size:12px; color:var(--ink-faint);">#{{ commande.pk }}</span></td>
+              <td>
+                <div style="display:flex; align-items:center; gap:var(--sp-2);">
+                  <div style="width:32px; height:32px; border-radius:50%; background:var(--agriculteur-soft); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; color:var(--agriculteur-dark);">
+                    {{ commande.agriculteur.utilisateur.first_name|first|upper }}
+                  </div>
+                  <span style="font-weight:500;">{{ commande.agriculteur.utilisateur.get_full_name }}</span>
+                </div>
+              </td>
+              <td style="color:var(--ink-soft);">{{ commande.date_commande|date:"d/m/Y" }}</td>
+              <td><span style="font-family:var(--font-mono); font-weight:700;">{{ commande.montant_total }} CDF</span></td>
+              <td>
+                <span class="status-badge
+                  {% if commande.statut == 'en_attente' %}status-attente
+                  {% elif commande.statut == 'validee' %}status-validee
+                  {% elif commande.statut == 'en_livraison' %}status-livraison
+                  {% elif commande.statut == 'livree' %}status-livree
+                  {% else %}status-annulee{% endif %}">
+                  {{ commande.get_statut_display }}
+                </span>
+              </td>
+              <td><a href="#" style="font-size:13px; font-weight:600; color:var(--lemon-dark);">Détails →</a></td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="6">
+                <div class="empty-table">
+                  <span class="empty-icon">🛒</span>
+                  Vous n'avez pas encore passé de commande.
+                  <a href="#" style="color:var(--acheteur-dark); font-weight:700; display:block; margin-top:var(--sp-3);">Explorer le catalogue →</a>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- RECOMMANDATIONS IA -->
+      {% if recommandations %}
+      <div style="margin-top:var(--sp-6);">
+        <div style="display:flex; align-items:center; gap:var(--sp-2); margin-bottom:var(--sp-4);">
+          <h2 style="font-size:18px; margin:0;">✨ Recommandé pour vous</h2>
+          <span style="font-family:var(--font-mono); font-size:9px; letter-spacing:0.1em; text-transform:uppercase; background:var(--lemon-soft); color:var(--lemon-dark); padding:2px 8px; border-radius:var(--r-full);">IA</span>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(220px,1fr)); gap:var(--sp-4);">
+          {% for produit, raison in recommandations %}
+          <a href="{% url 'detail_produit' produit.pk %}" class="produce-card" style="text-decoration:none; display:block;">
+            <div class="produce-media">
+              {% with photo=produit.photos.first %}
+                {% if photo %}<img src="{{ photo.image.url }}" alt="{{ produit.nom }}">
+                {% else %}<div class="produce-placeholder">🌿</div>{% endif %}
+              {% endwith %}
+              {% if produit.est_bio %}<span class="badge-bio">BIO</span>{% endif %}
+            </div>
+            <div class="produce-body">
+              <h3 class="produce-name" style="font-size:15px;">{{ produit.nom }}</h3>
+              <p class="produce-price" style="margin-bottom:var(--sp-2);"><span class="mono">{{ produit.prix_unitaire }} FCFA</span> / {{ produit.get_unite_display }}</p>
+              {% if raison %}
+              <div style="font-size:11px; color:var(--lemon-dark); font-style:italic;">✨ {{ raison }}</div>
+              {% endif %}
+            </div>
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+{% endblock %}

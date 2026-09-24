@@ -1,0 +1,83 @@
+{% extends 'base_auth.html' %}
+{% block title %}Score transporteur — AgriMarché{% endblock %}
+
+{% block content %}
+<div class="dash-shell">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <svg width="30" height="30" viewBox="0 0 36 36" fill="none">
+        <circle cx="18" cy="18" r="18" fill="#0B1F0E"/>
+        <path d="M18 6 C10 10 8 20 12 28 C14 24 16 20 18 18 C20 20 22 24 24 28 C28 20 26 10 18 6Z" fill="#7AE600"/>
+      </svg>
+      <span class="sidebar-brand-text">Agri<span>Marché</span></span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="{% url 'dashboard' %}" class="sidebar-link"><span class="icon">🏠</span> Tableau de bord</a>
+      <a href="{% url 'mes_livraisons' %}" class="sidebar-link"><span class="icon">🚚</span> Mes livraisons</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <a href="{% url 'deconnexion' %}" class="sidebar-logout"><span class="icon">🚪</span> Déconnexion</a>
+    </div>
+  </aside>
+
+  <div class="dash-main">
+    <div class="dash-topbar">
+      <div class="dash-topbar-title">⭐ Score de fiabilité</div>
+    </div>
+    <div class="dash-body">
+
+      <!-- Score global -->
+      <div class="dash-card" style="padding:var(--sp-7); margin-bottom:var(--sp-5); text-align:center;">
+        <div style="font-size:64px; margin-bottom:var(--sp-3);">
+          {% if score_data.badge == 'or' %}🥇
+          {% elif score_data.badge == 'argent' %}🥈
+          {% elif score_data.badge == 'bronze' %}🥉
+          {% else %}🚛{% endif %}
+        </div>
+        <div style="font-size:56px; font-weight:800; color:var(--lemon-dark); font-family:var(--font-display);">{{ score_data.score }}<span style="font-size:24px; color:var(--ink-faint);">/100</span></div>
+        <div style="font-size:18px; font-weight:700; margin-top:var(--sp-2);">{{ score_data.label }}</div>
+
+        <!-- Barre de progression -->
+        <div style="max-width:300px; margin:var(--sp-5) auto 0; background:var(--line); border-radius:var(--r-full); height:12px; overflow:hidden;">
+          <div style="height:100%; width:{{ score_data.score }}%; background:{% if score_data.score >= 85 %}var(--success){% elif score_data.score >= 70 %}var(--lemon){% elif score_data.score >= 50 %}var(--warning){% else %}var(--danger){% endif %}; border-radius:var(--r-full); transition:width 1s;"></div>
+        </div>
+      </div>
+
+      <!-- Détails -->
+      <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:var(--sp-4); margin-bottom:var(--sp-5);">
+        <div class="dash-card" style="padding:var(--sp-5); text-align:center;">
+          <div style="font-size:28px; font-weight:800; color:var(--lemon-dark);">{{ score_data.details.taux_reussite }}%</div>
+          <div style="font-size:12px; color:var(--ink-faint);">Taux de réussite</div>
+        </div>
+        <div class="dash-card" style="padding:var(--sp-5); text-align:center;">
+          <div style="font-size:28px; font-weight:800; color:var(--lemon-dark);">{{ score_data.details.note_moyenne }}/5</div>
+          <div style="font-size:12px; color:var(--ink-faint);">Note moyenne</div>
+        </div>
+        <div class="dash-card" style="padding:var(--sp-5); text-align:center;">
+          <div style="font-size:28px; font-weight:800; color:var(--lemon-dark);">{{ score_data.details.nb_livraisons }}</div>
+          <div style="font-size:12px; color:var(--ink-faint);">Livraisons totales</div>
+        </div>
+      </div>
+
+      <!-- Analyse sentiments commentaires -->
+      {% if score_data.evaluations_analysees %}
+      <div class="dash-card" style="padding:var(--sp-6);">
+        <h3 style="font-size:16px; margin-bottom:var(--sp-4);">💬 Analyse des commentaires</h3>
+        {% for e in score_data.evaluations_analysees %}
+        <div style="border-bottom:1px solid var(--line); padding:var(--sp-4) 0;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--sp-2);">
+            <div style="color:var(--warning);">{% for i in "12345" %}{% if forloop.counter <= e.note %}★{% else %}☆{% endif %}{% endfor %}</div>
+            <span class="status-badge {% if e.sentiment == 'positif' %}status-validee{% elif e.sentiment == 'negatif' %}status-annulee{% else %}status-attente{% endif %}">
+              {% if e.sentiment == 'positif' %}😊 Positif{% elif e.sentiment == 'negatif' %}😞 Négatif{% else %}😐 Neutre{% endif %}
+            </span>
+          </div>
+          <p style="font-size:14px; color:var(--ink-soft);">{{ e.commentaire }}</p>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+{% endblock %}

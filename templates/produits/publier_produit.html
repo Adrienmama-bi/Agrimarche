@@ -1,0 +1,332 @@
+{% extends 'base_auth.html' %}
+{% load static %}
+{% block title %}Publier un produit — AgriMarché{% endblock %}
+
+{% block content %}
+<div class="dash-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <svg width="30" height="30" viewBox="0 0 36 36" fill="none">
+        <circle cx="18" cy="18" r="18" fill="#0B1F0E"/>
+        <path d="M18 6 C10 10 8 20 12 28 C14 24 16 20 18 18 C20 20 22 24 24 28 C28 20 26 10 18 6Z" fill="#7AE600"/>
+        <line x1="18" y1="8" x2="18" y2="27" stroke="#0B1F0E" stroke-width="1.2" stroke-linecap="round"/>
+        <line x1="18" y1="13" x2="13" y2="17" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+        <line x1="18" y1="17" x2="13" y2="21" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+        <line x1="18" y1="13" x2="23" y2="17" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+        <line x1="18" y1="17" x2="23" y2="21" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+      </svg>
+      <span class="sidebar-brand-text">Agri<span>Marché</span></span>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="sidebar-user-avatar" style="background:var(--agriculteur);">
+        {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
+      </div>
+      <div class="sidebar-user-name">{{ request.user.get_full_name }}</div>
+      <span class="sidebar-user-role role-badge-agriculteur">Agriculteur</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <span class="sidebar-section-label">Principal</span>
+      <a href="{% url 'dashboard_agriculteur' %}" class="sidebar-link">
+        <span class="icon">🏠</span> Tableau de bord
+      </a>
+      <a href="{% url 'publier_produit' %}" class="sidebar-link is-active">
+        <span class="icon">➕</span> Publier un produit
+      </a>
+      <a href="{% url 'mes_produits' %}" class="sidebar-link">
+        <span class="icon">🌿</span> Mes produits
+      </a>
+      <a href="#" class="sidebar-link">
+        <span class="icon">📥</span> Commandes reçues
+      </a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <a href="{% url 'deconnexion' %}" class="sidebar-logout">
+        <span class="icon">🚪</span> Déconnexion
+      </a>
+    </div>
+  </aside>
+
+  <div class="dash-main">
+
+    <div class="dash-topbar">
+      <div>
+        <div class="dash-topbar-title">Publier un produit</div>
+        <div style="font-size:12px; color:var(--ink-faint); margin-top:2px;">
+          Remplissez les informations de votre annonce
+        </div>
+      </div>
+      <a href="{% url 'mes_produits' %}" class="btn btn-ghost" style="padding:10px 20px; font-size:14px;">
+        ← Mes produits
+      </a>
+    </div>
+
+    <div class="dash-body">
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div style="display:grid; grid-template-columns:1.4fr 1fr; gap:var(--sp-6); align-items:start;">
+
+          <!-- COLONNE GAUCHE -->
+          <div>
+
+            <!-- INFOS PRINCIPALES -->
+            <div class="dash-card" style="margin-bottom:var(--sp-5);">
+              <div class="dash-card-head">
+                <span class="dash-card-title">Informations principales</span>
+              </div>
+              <div style="padding:var(--sp-5);">
+                <div class="field">
+                  <label>Nom du produit *</label>
+                  <input type="text" name="nom"
+                    class="input{% if form.nom.errors %} has-error{% endif %}"
+                    value="{{ form.nom.value|default:'' }}"
+                    placeholder="Ex : Maïs frais de la récolte 2025"
+                    required>
+                  {% if form.nom.errors %}<span class="field-error">{{ form.nom.errors.0 }}</span>{% endif %}
+                </div>
+
+                <div class="field">
+                  <label>Catégorie *</label>
+                  <select name="categorie" class="input{% if form.categorie.errors %} has-error{% endif %}">
+                    <option value="">Choisir une catégorie</option>
+                    {% for cat in form.fields.categorie.queryset %}
+                    <option value="{{ cat.pk }}" {% if form.categorie.value == cat.pk|stringformat:"s" %}selected{% endif %}>
+                      {{ cat.icone }} {{ cat.nom }}
+                    </option>
+                    {% endfor %}
+                  </select>
+                  {% if form.categorie.errors %}<span class="field-error">{{ form.categorie.errors.0 }}</span>{% endif %}
+                </div>
+
+                <div class="field">
+                  <label>Description *</label>
+                  <textarea name="description"
+                    class="input{% if form.description.errors %} has-error{% endif %}"
+                    rows="4"
+                    placeholder="Décrivez votre produit : variété, mode de culture, qualité...">{{ form.description.value|default:'' }}</textarea>
+                  {% if form.description.errors %}<span class="field-error">{{ form.description.errors.0 }}</span>{% endif %}
+                </div>
+
+                <div class="field">
+                  <label>Localisation *</label>
+                  <input type="text" name="localisation"
+                    class="input"
+                    value="{{ form.localisation.value|default:'' }}"
+                    placeholder="Ville, Province">
+                </div>
+
+                <label style="display:flex; align-items:center; gap:var(--sp-2); font-size:14px; cursor:pointer; margin-top:var(--sp-2);">
+                  <input type="checkbox" name="est_bio" {% if form.est_bio.value %}checked{% endif %} style="accent-color:var(--lemon); width:16px; height:16px;">
+                  <span>🌿 Ce produit est cultivé en agriculture biologique</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- PHOTOS -->
+            <div class="dash-card">
+              <div class="dash-card-head">
+                <span class="dash-card-title">Photos du produit</span>
+              </div>
+              <div style="padding:var(--sp-5);">
+                <div id="drop-zone" style="border:2px dashed var(--line); border-radius:var(--r-lg); padding:var(--sp-8) var(--sp-5); text-align:center; cursor:pointer; transition:border-color .15s, background .15s;" onclick="document.getElementById('photos-input').click()">
+                  <div style="font-size:36px; margin-bottom:var(--sp-3);">📸</div>
+                  <div style="font-weight:600; margin-bottom:var(--sp-2);">Cliquez pour ajouter des photos</div>
+                  <div style="font-size:13px; color:var(--ink-faint);">PNG, JPG jusqu'à 5MB — La première photo sera la photo principale</div>
+                  <input type="file" id="photos-input" name="photos" multiple accept="image/*" style="display:none;">
+                </div>
+                <div id="photos-preview" style="display:flex; flex-wrap:wrap; gap:var(--sp-3); margin-top:var(--sp-4);"></div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- COLONNE DROITE -->
+          <div>
+
+            <!-- PRIX ET STOCK -->
+            <div class="dash-card" style="margin-bottom:var(--sp-5);">
+              <div class="dash-card-head">
+                <span class="dash-card-title">Prix & Stock</span>
+              </div>
+              <div style="padding:var(--sp-5);">
+                <div class="field">
+                  <label>Prix unitaire (CDF) *</label>
+                  <input type="number" name="prix_unitaire"
+                    class="input{% if form.prix_unitaire.errors %} has-error{% endif %}"
+                    value="{{ form.prix_unitaire.value|default:'' }}"
+                    placeholder="0"
+                    step="0.01"
+                    min="0"
+                    required>
+                  {% if form.prix_unitaire.errors %}<span class="field-error">{{ form.prix_unitaire.errors.0 }}</span>{% endif %}
+                </div>
+
+                <div class="field">
+                  <label>Unité *</label>
+                  <select name="unite" class="input">
+                    {% for value, label in form.fields.unite.choices %}
+                    <option value="{{ value }}" {% if form.unite.value == value %}selected{% endif %}>
+                      {{ label }}
+                    </option>
+                    {% endfor %}
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label>Quantité disponible *</label>
+                  <input type="number" name="quantite_disponible"
+                    class="input{% if form.quantite_disponible.errors %} has-error{% endif %}"
+                    value="{{ form.quantite_disponible.value|default:'' }}"
+                    placeholder="0"
+                    step="0.5"
+                    min="0"
+                    required>
+                  {% if form.quantite_disponible.errors %}<span class="field-error">{{ form.quantite_disponible.errors.0 }}</span>{% endif %}
+                </div>
+
+                <div class="field">
+                  <label>Quantité minimum de commande</label>
+                  <input type="number" name="quantite_min_commande"
+                    class="input"
+                    value="{{ form.quantite_min_commande.value|default:'1' }}"
+                    step="0.5"
+                    min="0">
+                </div>
+              </div>
+            </div>
+
+            <!-- DATES -->
+            <div class="dash-card" style="margin-bottom:var(--sp-5);">
+              <div class="dash-card-head">
+                <span class="dash-card-title">Dates</span>
+              </div>
+              <div style="padding:var(--sp-5);">
+                <div class="field">
+                  <label>Date de récolte</label>
+                  <input type="date" name="date_recolte"
+                    class="input"
+                    value="{{ form.date_recolte.value|default:'' }}">
+                </div>
+                <div class="field" style="margin-bottom:0;">
+                  <label>Date d'expiration</label>
+                  <input type="date" name="date_expiration"
+                    class="input"
+                    value="{{ form.date_expiration.value|default:'' }}">
+                </div>
+              </div>
+            </div>
+
+            <!-- RÉCAPITULATIF -->
+            <div style="background:var(--soil); border-radius:var(--r-lg); padding:var(--sp-5); border:1px solid rgba(122,230,0,0.12);">
+              <div style="font-family:var(--font-mono); font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:var(--lemon); margin-bottom:var(--sp-4);">À savoir</div>
+              <div style="display:flex; flex-direction:column; gap:var(--sp-3);">
+                <div style="display:flex; align-items:flex-start; gap:var(--sp-2); font-size:13px; color:rgba(255,255,255,0.65);">
+                  <span style="color:var(--lemon); flex-shrink:0;">✓</span>
+                  Votre annonce sera vérifiée par notre équipe avant publication.
+                </div>
+                <div style="display:flex; align-items:flex-start; gap:var(--sp-2); font-size:13px; color:rgba(255,255,255,0.65);">
+                  <span style="color:var(--lemon); flex-shrink:0;">✓</span>
+                  Les acheteurs pourront vous contacter via la messagerie interne.
+                </div>
+                <div style="display:flex; align-items:flex-start; gap:var(--sp-2); font-size:13px; color:rgba(255,255,255,0.65);">
+                  <span style="color:var(--lemon); flex-shrink:0;">✓</span>
+                  Vous recevrez une notification dès qu'une commande arrive.
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-lemon btn-block btn-lg" style="margin-top:var(--sp-5);">
+                Publier l'annonce →
+              </button>
+              <a href="{% url 'dashboard_agriculteur' %}" class="btn btn-ghost-light btn-block" style="margin-top:var(--sp-3);">
+                Annuler
+              </a>
+            </div>
+
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  // Prévisualisation des photos
+  const input = document.getElementById('photos-input');
+  const preview = document.getElementById('photos-preview');
+  const dropZone = document.getElementById('drop-zone');
+
+  input.addEventListener('change', function() {
+    preview.innerHTML = '';
+    Array.from(this.files).forEach((file, i) => {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const wrap = document.createElement('div');
+        wrap.style.cssText = 'position:relative; width:80px; height:80px;';
+        const img = document.createElement('img');
+        img.src = e.target.result;
+        img.style.cssText = 'width:80px; height:80px; object-fit:cover; border-radius:8px; border:2px solid ' + (i === 0 ? 'var(--lemon)' : 'var(--line)') + ';';
+        if (i === 0) {
+          const badge = document.createElement('span');
+          badge.textContent = 'Principal';
+          badge.style.cssText = 'position:absolute; bottom:4px; left:50%; transform:translateX(-50%); background:var(--lemon); color:var(--soil); font-size:9px; font-weight:700; padding:2px 5px; border-radius:4px; white-space:nowrap;';
+          wrap.appendChild(badge);
+        }
+        wrap.appendChild(img);
+        preview.appendChild(wrap);
+      };
+      reader.readAsDataURL(file);
+    });
+  });
+
+  // Drag & drop
+  dropZone.addEventListener('dragover', e => {
+    e.preventDefault();
+    dropZone.style.borderColor = 'var(--lemon)';
+    dropZone.style.background = 'var(--lemon-soft)';
+  });
+  dropZone.addEventListener('dragleave', () => {
+    dropZone.style.borderColor = 'var(--line)';
+    dropZone.style.background = '';
+  });
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.style.borderColor = 'var(--line)';
+    dropZone.style.background = '';
+    input.files = e.dataTransfer.files;
+    input.dispatchEvent(new Event('change'));
+  });
+  // Suggestion de prix automatique quand on change de catégorie
+document.getElementById('id_categorie').addEventListener('change', function() {
+  const categorieId = this.value;
+  const estBio = document.querySelector('input[name="est_bio"]')?.checked ? '1' : '0';
+
+  if (!categorieId) return;
+
+  fetch(/assistant/suggerer-prix/?categorie_id=${categorieId}&est_bio=${estBio})
+    .then(r => r.json())
+    .then(data => {
+      if (data.ok) {
+        const s = data.suggestion;
+        const div = document.getElementById('suggestion-prix');
+        if (!div) {
+          const newDiv = document.createElement('div');
+          newDiv.id = 'suggestion-prix';
+          newDiv.style.cssText = 'background:var(--lemon-soft);border:1px solid var(--lemon);border-radius:var(--r-md);padding:12px;font-size:13px;margin-top:8px;';
+          newDiv.innerHTML = 💡 <strong>Suggestion IA :</strong> ${s.conseil} <span style="font-family:monospace;color:var(--lemon-dark);font-weight:700;">(${s.prix_min} — ${s.prix_max} CFA)</span>;
+          document.getElementById('id_prix_unitaire').parentNode.appendChild(newDiv);
+        } else {
+          div.innerHTML = 💡 <strong>Suggestion IA :</strong> ${s.conseil} <span style="font-family:monospace;color:var(--lemon-dark);font-weight:700;">(${s.prix_min} — ${s.prix_max} CFA)</span>;
+        }
+      }
+    })
+    .catch(() => {});
+});
+</script>
+
+{% endblock %}

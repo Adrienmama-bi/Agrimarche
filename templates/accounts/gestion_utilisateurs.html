@@ -1,0 +1,134 @@
+{% extends 'base_auth.html' %}
+{% load static %}
+{% block title %}Gestion des utilisateurs — AgriMarché{% endblock %}
+
+{% block content %}
+<div class="dash-shell">
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <svg width="30" height="30" viewBox="0 0 36 36" fill="none">
+        <circle cx="18" cy="18" r="18" fill="#0B1F0E"/>
+        <path d="M18 6 C10 10 8 20 12 28 C14 24 16 20 18 18 C20 20 22 24 24 28 C28 20 26 10 18 6Z" fill="#7AE600"/>
+        <line x1="18" y1="8" x2="18" y2="27" stroke="#0B1F0E" stroke-width="1.2" stroke-linecap="round"/>
+        <line x1="18" y1="13" x2="13" y2="17" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+        <line x1="18" y1="17" x2="13" y2="21" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+        <line x1="18" y1="13" x2="23" y2="17" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+        <line x1="18" y1="17" x2="23" y2="21" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+      </svg>
+      <span class="sidebar-brand-text">Agri<span>Marché</span></span>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="sidebar-user-avatar" style="background:var(--lemon); color:var(--soil);">
+        {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
+      </div>
+      <div class="sidebar-user-name">{{ request.user.get_full_name }}</div>
+      <span class="sidebar-user-role" style="background:rgba(122,230,0,0.15); color:var(--lemon);">Administrateur</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <span class="sidebar-section-label">Administration</span>
+      <a href="{% url 'dashboard_admin' %}" class="sidebar-link">
+        <span class="icon">🏠</span> Tableau de bord
+      </a>
+      <a href="{% url 'gestion_utilisateurs' %}" class="sidebar-link is-active">
+        <span class="icon">👥</span> Utilisateurs
+      </a>
+      <a href="{% url 'moderation_produits' %}" class="sidebar-link">
+        <span class="icon">🌿</span> Modération produits
+      </a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <a href="{% url 'deconnexion' %}" class="sidebar-logout">
+        <span class="icon">🚪</span> Déconnexion
+      </a>
+    </div>
+  </aside>
+
+  <div class="dash-main">
+
+    <div class="dash-topbar">
+      <div>
+        <div class="dash-topbar-title">Gestion des utilisateurs</div>
+        <div style="font-size:12px; color:var(--ink-faint); margin-top:2px;">
+          {{ users.count }} utilisateur{% if users.count > 1 %}s{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="dash-body">
+
+      <div style="display:flex; gap:var(--sp-2); margin-bottom:var(--sp-5);">
+        <a href="?role=" class="btn {% if not role_filtre %}btn-lemon{% else %}btn-ghost{% endif %}" style="padding:8px 16px; font-size:13px;">Tous</a>
+        <a href="?role=agriculteur" class="btn {% if role_filtre == 'agriculteur' %}btn-lemon{% else %}btn-ghost{% endif %}" style="padding:8px 16px; font-size:13px;">🌾 Agriculteurs</a>
+        <a href="?role=acheteur" class="btn {% if role_filtre == 'acheteur' %}btn-lemon{% else %}btn-ghost{% endif %}" style="padding:8px 16px; font-size:13px;">🛒 Acheteurs</a>
+        <a href="?role=transporteur" class="btn {% if role_filtre == 'transporteur' %}btn-lemon{% else %}btn-ghost{% endif %}" style="padding:8px 16px; font-size:13px;">🚛 Transporteurs</a>
+      </div>
+
+      <div class="dash-card">
+        <table class="dash-table">
+          <thead>
+            <tr>
+              <th>Utilisateur</th>
+              <th>Email</th>
+              <th>Téléphone</th>
+              <th>Rôle</th>
+              <th>Inscrit le</th>
+              <th>Statut</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for user in users %}
+            <tr>
+              <td>
+                <div style="display:flex; align-items:center; gap:var(--sp-2);">
+                  <div style="width:34px; height:34px; border-radius:50%; background:var(--lemon); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:13px; color:var(--soil);">
+                    {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+                  </div>
+                  <span style="font-weight:600; font-size:13px;">{{ user.get_full_name }}</span>
+                </div>
+              </td>
+              <td style="font-size:13px; color:var(--ink-soft);">{{ user.email }}</td>
+              <td style="font-size:13px; color:var(--ink-soft);">{{ user.telephone|default:"—" }}</td>
+              <td>
+                <span class="status-badge
+                  {% if user.role == 'agriculteur' %}status-validee
+                  {% elif user.role == 'acheteur' %}status-attente
+                  {% elif user.role == 'transporteur' %}status-livraison
+                  {% else %}status-annulee{% endif %}">
+                  {{ user.get_role_display }}
+                </span>
+              </td>
+              <td style="font-size:12px; color:var(--ink-faint);">{{ user.date_inscription|date:"d/m/Y" }}</td>
+              <td>
+                <span class="status-badge {% if user.statut == 'actif' %}status-validee{% else %}status-annulee{% endif %}">
+                  {{ user.get_statut_display }}
+                </span>
+              </td>
+              <td>
+                <form method="post" action="{% url 'suspendre_utilisateur' user.pk %}">
+                  {% csrf_token %}
+                  <button type="submit" style="background:none; border:none; cursor:pointer; font-size:12px; font-weight:600; color:{% if user.statut == 'actif' %}var(--danger){% else %}var(--success){% endif %};">
+                    {% if user.statut == 'actif' %}Suspendre{% else %}Réactiver{% endif %}
+                  </button>
+                </form>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="7">
+                <div class="empty-table">Aucun utilisateur trouvé.</div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

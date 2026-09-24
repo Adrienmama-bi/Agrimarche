@@ -1,0 +1,179 @@
+{% extends 'base_auth.html' %}
+{% load static %}
+{% block title %}Mon profil — AgriMarché{% endblock %}
+
+{% block content %}
+<div class="dash-shell">
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <svg width="30" height="30" viewBox="0 0 36 36" fill="none">
+        <circle cx="18" cy="18" r="18" fill="#0B1F0E"/>
+        <path d="M18 6 C10 10 8 20 12 28 C14 24 16 20 18 18 C20 20 22 24 24 28 C28 20 26 10 18 6Z" fill="#7AE600"/>
+        <line x1="18" y1="8" x2="18" y2="27" stroke="#0B1F0E" stroke-width="1.2" stroke-linecap="round"/>
+        <line x1="18" y1="13" x2="13" y2="17" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+        <line x1="18" y1="17" x2="13" y2="21" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+        <line x1="18" y1="13" x2="23" y2="17" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+        <line x1="18" y1="17" x2="23" y2="21" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+      </svg>
+      <span class="sidebar-brand-text">Agri<span>Marché</span></span>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="sidebar-user-avatar" style="background:{% if request.user.est_agriculteur %}var(--agriculteur){% elif request.user.est_acheteur %}var(--acheteur){% else %}var(--transporteur){% endif %};">
+        {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
+      </div>
+      <div class="sidebar-user-name">{{ request.user.get_full_name }}</div>
+      <span class="sidebar-user-role role-badge-{{ request.user.role }}">{{ request.user.get_role_display }}</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <span class="sidebar-section-label">Principal</span>
+      <a href="{% url 'dashboard' %}" class="sidebar-link">
+        <span class="icon">🏠</span> Tableau de bord
+      </a>
+
+      <span class="sidebar-section-label" style="margin-top:var(--sp-3);">Compte</span>
+      <a href="{% url 'mon_profil' %}" class="sidebar-link is-active">
+        <span class="icon">👤</span> Mon profil
+      </a>
+      {% if request.user.est_transporteur %}
+      <a href="{% url 'gestion_vehicules' %}" class="sidebar-link">
+        <span class="icon">🚛</span> Mon véhicule
+      </a>
+      {% endif %}
+    </nav>
+
+    <div class="sidebar-bottom">
+      <a href="{% url 'deconnexion' %}" class="sidebar-logout">
+        <span class="icon">🚪</span> Déconnexion
+      </a>
+    </div>
+  </aside>
+
+  <div class="dash-main">
+
+    <div class="dash-topbar">
+      <div>
+        <div class="dash-topbar-title">Mon profil</div>
+        <div style="font-size:12px; color:var(--ink-faint); margin-top:2px;">Gérez vos informations personnelles</div>
+      </div>
+    </div>
+
+    <div class="dash-body" style="max-width:680px;">
+
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- PHOTO -->
+        <div class="dash-card" style="padding:var(--sp-5); margin-bottom:var(--sp-5); display:flex; align-items:center; gap:var(--sp-4);">
+          {% if request.user.photo %}
+          <img src="{{ request.user.photo.url }}" alt="" style="width:64px; height:64px; border-radius:50%; object-fit:cover;">
+          {% else %}
+          <div style="width:64px; height:64px; border-radius:50%; background:var(--lemon); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:22px; color:var(--soil);">
+            {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
+          </div>
+          {% endif %}
+          <div style="flex:1;">
+            <label style="font-size:13px; font-weight:600; display:block; margin-bottom:6px;">Photo de profil</label>
+            <input type="file" name="photo" accept="image/*" class="input" style="padding:10px;">
+          </div>
+        </div>
+
+        <!-- INFOS PERSONNELLES -->
+        <div class="dash-card" style="margin-bottom:var(--sp-5);">
+          <div class="dash-card-head">
+            <span class="dash-card-title">Informations personnelles</span>
+          </div>
+          <div style="padding:var(--sp-5);">
+            <div class="field-row">
+              <div class="field">
+                <label>Prénom</label>
+                <input type="text" name="first_name" class="input" value="{{ form.first_name.value|default:'' }}">
+              </div>
+              <div class="field">
+                <label>Nom</label>
+                <input type="text" name="last_name" class="input" value="{{ form.last_name.value|default:'' }}">
+              </div>
+            </div>
+            <div class="field" style="margin-bottom:0;">
+              <label>Téléphone</label>
+              <input type="text" name="telephone" class="input" value="{{ form.telephone.value|default:'' }}">
+            </div>
+          </div>
+        </div>
+
+        <!-- INFOS SPÉCIFIQUES AU RÔLE -->
+        <div class="dash-card" style="margin-bottom:var(--sp-5);">
+          <div class="dash-card-head">
+            <span class="dash-card-title">
+              {% if request.user.est_agriculteur %}Informations exploitation
+              {% elif request.user.est_acheteur %}Informations livraison
+              {% else %}Informations transport{% endif %}
+            </span>
+          </div>
+          <div style="padding:var(--sp-5);">
+
+            {% if request.user.est_agriculteur %}
+            <div class="field">
+              <label>Nom de l'exploitation</label>
+              <input type="text" name="exploitation" class="input" value="{{ form.exploitation.value|default:'' }}">
+            </div>
+            <div class="field">
+              <label>Localisation</label>
+              <input type="text" name="localisation" class="input" value="{{ form.localisation.value|default:'' }}">
+            </div>
+            <div class="field">
+              <label>Superficie (hectares)</label>
+              <input type="number" name="superficie" class="input" step="0.1" value="{{ form.superficie.value|default:'' }}">
+            </div>
+            <div class="field">
+              <label>Types de production</label>
+              <input type="text" name="types_production" class="input" value="{{ form.types_production.value|default:'' }}" placeholder="Maïs, manioc, légumes...">
+            </div>
+            <div class="field" style="margin-bottom:0;">
+              <label>Présentation</label>
+              <textarea name="bio" class="input" rows="3">{{ form.bio.value|default:'' }}</textarea>
+            </div>
+
+            {% elif request.user.est_acheteur %}
+            <div class="field">
+              <label>Adresse de livraison habituelle</label>
+              <input type="text" name="adresse_livraison" class="input" value="{{ form.adresse_livraison.value|default:'' }}">
+            </div>
+            <div class="field" style="margin-bottom:0;">
+              <label>Type d'acheteur</label>
+              <select name="type_acheteur" class="input">
+                {% for value, label in form.fields.type_acheteur.choices %}
+                <option value="{{ value }}" {% if form.type_acheteur.value == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            {% else %}
+            <div class="field">
+              <label>Zones de couverture</label>
+              <input type="text" name="zone_couverture" class="input" value="{{ form.zone_couverture.value|default:'' }}" placeholder="Kinshasa, Kongo-Central...">
+            </div>
+            <div class="field">
+              <label>Numéro de permis</label>
+              <input type="text" name="numero_permis" class="input" value="{{ form.numero_permis.value|default:'' }}">
+            </div>
+            <label style="display:flex; align-items:center; gap:var(--sp-2); font-size:14px; cursor:pointer;">
+              <input type="checkbox" name="disponible" {% if form.disponible.value %}checked{% endif %} style="accent-color:var(--lemon); width:16px; height:16px;">
+              <span>Je suis actuellement disponible pour des missions</span>
+            </label>
+            {% endif %}
+
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-lemon btn-lg">
+          Enregistrer les modifications →
+        </button>
+      </form>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

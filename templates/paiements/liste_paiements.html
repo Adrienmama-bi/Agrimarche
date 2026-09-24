@@ -1,0 +1,207 @@
+{% extends 'base_auth.html' %}
+{% load static %}
+{% block title %}Mes paiements — AgriMarché{% endblock %}
+
+{% block content %}
+<div class="dash-shell">
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <svg width="30" height="30" viewBox="0 0 36 36" fill="none">
+        <circle cx="18" cy="18" r="18" fill="#0B1F0E"/>
+        <path d="M18 6 C10 10 8 20 12 28 C14 24 16 20 18 18 C20 20 22 24 24 28 C28 20 26 10 18 6Z" fill="#7AE600"/>
+        <line x1="18" y1="8" x2="18" y2="27" stroke="#0B1F0E" stroke-width="1.2" stroke-linecap="round"/>
+      </svg>
+      <span class="sidebar-brand-text">Agri<span>Marché</span></span>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="sidebar-user-avatar" style="background:{% if request.user.est_agriculteur %}var(--agriculteur){% elif request.user.est_acheteur %}var(--acheteur){% else %}var(--transporteur){% endif %};">
+        {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
+      </div>
+      <div class="sidebar-user-name">{{ request.user.get_full_name }}</div>
+      <span class="sidebar-user-role role-badge-{{ request.user.role }}">{{ request.user.get_role_display }}</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="{% url 'dashboard' %}" class="sidebar-link">
+        <span class="icon">🏠</span> Tableau de bord
+      </a>
+      <a href="{% url 'mes_paiements' %}" class="sidebar-link is-active">
+        <span class="icon">💳</span> Mes paiements
+      </a>
+      {% if request.user.est_acheteur %}
+      <a href="{% url 'mes_commandes' %}" class="sidebar-link">
+        <span class="icon">📦</span> Mes commandes
+      </a>
+      {% elif request.user.est_agriculteur %}
+      <a href="{% url 'commandes_recues' %}" class="sidebar-link">
+        <span class="icon">📥</span> Commandes reçues
+      </a>
+      {% endif %}
+    </nav>
+
+    <div class="sidebar-bottom">
+      <a href="{% url 'deconnexion' %}" class="sidebar-logout">
+        <span class="icon">🚪</span> Déconnexion
+      </a>
+    </div>
+  </aside>
+
+  <div class="dash-main">
+    <div class="dash-topbar">
+      <div>
+        <div class="dash-topbar-title">💳 Mes paiements</div>
+        <div style="font-size:12px; color:var(--ink-faint); margin-top:2px;">
+          Historique de toutes vos transactions
+        </div>
+      </div>
+    </div>
+
+    <div class="dash-body">
+
+      <!-- Résumé -->
+      <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:var(--sp-4); margin-bottom:var(--sp-5);">
+        <div class="dash-card" style="padding:var(--sp-5); background:var(--soil);">
+          <div style="font-size:12px; color:rgba(255,255,255,0.5); margin-bottom:4px;">
+            {% if request.user.est_acheteur %}Total dépensé{% else %}Total reçu{% endif %}
+          </div>
+          <div style="font-family:var(--font-display); font-weight:800; font-size:22px; color:var(--lemon);">
+            {{ total_montant|default:0|floatformat:0 }} CFA
+          </div>
+        </div>
+        <div class="dash-card" style="padding:var(--sp-5);">
+          <div style="font-size:12px; color:var(--ink-faint); margin-bottom:4px;">Paiements confirmés</div>
+          <div style="font-family:var(--font-display); font-weight:800; font-size:22px; color:var(--success);">
+            {{ nb_confirmes }}
+          </div>
+        </div>
+        <div class="dash-card" style="padding:var(--sp-5);">
+          <div style="font-size:12px; color:var(--ink-faint); margin-bottom:4px;">En attente</div>
+          <div style="font-family:var(--font-display); font-weight:800; font-size:22px; color:var(--warning);">
+            {{ nb_attente }}
+          </div>
+        </div>
+        {% if request.user.est_acheteur %}
+        <div class="dash-card" style="padding:var(--sp-5);">
+          <div style="font-size:12px; color:var(--ink-faint); margin-bottom:4px;">Commissions payées</div>
+          <div style="font-family:var(--font-display); font-weight:800; font-size:22px; color:var(--ink-soft);">
+            {{ total_commission|default:0|floatformat:0 }} CFA
+          </div>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Tableau des paiements -->
+      {% if paiements %}
+      <div class="dash-card">
+        <div class="dash-card-head">
+          <span class="dash-card-title">Historique des transactions</span>
+        </div>
+        <table class="dash-table">
+          <thead>
+            <tr>
+              <th>Référence</th>
+              <th>Commande</th>
+              {% if request.user.est_agriculteur %}
+              <th>Acheteur</th>
+              {% else %}
+              <th>Agriculteur</th>
+              {% endif %}
+              <th>Montant</th>
+              <th>Commission</th>
+              <th>Méthode</th>
+              <th>Statut</th>
+              <th>Date</th>
+              <th>Reçu</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for paiement in paiements %}
+            <tr>
+              <td>
+                <span style="font-family:var(--font-mono); font-size:11px; color:var(--ink-faint);">
+                  {{ paiement.reference_externe|default:"—" }}
+                </span>
+              </td>
+              <td>
+                <a href="{% url 'detail_commande' paiement.commande.pk %}"
+                   style="font-family:var(--font-mono); font-size:12px; color:var(--lemon-dark); font-weight:600;">
+                  #{{ paiement.commande.pk }}
+                </a>
+              </td>
+              <td style="font-size:13px;">
+                {% if request.user.est_agriculteur %}
+                {{ paiement.commande.acheteur.utilisateur.get_full_name }}
+                {% else %}
+                {{ paiement.commande.agriculteur.utilisateur.get_full_name }}
+                {% endif %}
+              </td>
+              <td style="font-weight:700; font-family:var(--font-mono); font-size:13px;">
+                {{ paiement.montant|floatformat:0 }} CFA
+              </td>
+              <td style="font-size:12px; color:var(--ink-faint);">
+                {{ paiement.commission|floatformat:0|default:"—" }} CFA
+              </td>
+              <td>
+                <span style="font-size:12px;">
+                  {% if paiement.methode == 'mobile_money' %}📱 Mobile Money
+                  {% elif paiement.methode == 'carte' %}💳 Carte
+                  {% elif paiement.methode == 'especes' %}💵 Espèces
+                  {% else %}{{ paiement.get_methode_display }}{% endif %}
+                </span>
+              </td>
+              <td>
+                <span class="status-badge {% if paiement.statut == 'confirme' %}status-validee{% elif paiement.statut == 'en_attente' %}status-attente{% elif paiement.statut == 'rejete' %}status-annulee{% else %}status-attente{% endif %}">
+                  {% if paiement.statut == 'confirme' %}✓ Confirmé
+                  {% elif paiement.statut == 'en_attente' %}⏳ En attente
+                  {% elif paiement.statut == 'rejete' %}✕ Rejeté
+                  {% else %}{{ paiement.get_statut_display }}{% endif %}
+                </span>
+                {% if paiement.statut_fraude == 'suspect' %}
+                <span class="status-badge status-attente" style="margin-top:3px; display:block; font-size:9px;">⚠️ Suspect</span>
+                {% elif paiement.statut_fraude == 'frauduleux' %}
+                <span class="status-badge status-annulee" style="margin-top:3px; display:block; font-size:9px;">🚫 Bloqué</span>
+                {% endif %}
+              </td>
+              <td style="font-size:12px; color:var(--ink-faint);">
+                {{ paiement.date_transaction|date:"d/m/Y H:i" }}
+              </td>
+              <td>
+                {% if paiement.statut == 'confirme' %}
+                <a href="{% url 'recu_paiement' paiement.pk %}"
+                   class="btn btn-ghost"
+                   style="padding:4px 10px; font-size:11px;">
+                  🧾 Reçu
+                </a>
+                {% else %}—{% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% else %}
+      <div style="text-align:center; padding:var(--sp-10);">
+        <div style="font-size:64px; margin-bottom:var(--sp-5);">💳</div>
+        <h2 style="font-size:22px; margin-bottom:var(--sp-3);">Aucune transaction</h2>
+        <p style="color:var(--ink-soft);">
+          {% if request.user.est_acheteur %}
+          Vos paiements apparaîtront ici après votre première commande.
+          {% else %}
+          Vos revenus apparaîtront ici dès qu'une commande sera payée.
+          {% endif %}
+        </p>
+        {% if request.user.est_acheteur %}
+        <a href="{% url 'catalogue' %}" class="btn btn-lemon btn-lg" style="margin-top:var(--sp-5);">
+          Explorer le catalogue →
+        </a>
+        {% endif %}
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+{% endblock %}

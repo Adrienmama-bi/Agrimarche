@@ -1,0 +1,230 @@
+{% extends 'base_auth.html' %}
+{% load static %}
+{% block title %}Administration — AgriMarché{% endblock %}
+
+{% block content %}
+<div class="dash-shell">
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <svg width="30" height="30" viewBox="0 0 36 36" fill="none">
+        <circle cx="18" cy="18" r="18" fill="#0B1F0E"/>
+        <path d="M18 6 C10 10 8 20 12 28 C14 24 16 20 18 18 C20 20 22 24 24 28 C28 20 26 10 18 6Z" fill="#7AE600"/>
+        <line x1="18" y1="8" x2="18" y2="27" stroke="#0B1F0E" stroke-width="1.2" stroke-linecap="round"/>
+        <line x1="18" y1="13" x2="13" y2="17" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+        <line x1="18" y1="17" x2="13" y2="21" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+        <line x1="18" y1="13" x2="23" y2="17" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+        <line x1="18" y1="17" x2="23" y2="21" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+      </svg>
+      <span class="sidebar-brand-text">Agri<span>Marché</span></span>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="sidebar-user-avatar" style="background:var(--lemon); color:var(--soil);">
+        {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
+      </div>
+      <div class="sidebar-user-name">{{ request.user.get_full_name }}</div>
+      <span class="sidebar-user-role" style="background:rgba(122,230,0,0.15); color:var(--lemon);">Administrateur</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <span class="sidebar-section-label">Administration</span>
+      <a href="{% url 'dashboard_admin' %}" class="sidebar-link is-active">
+        <span class="icon">🏠</span> Tableau de bord
+      </a>
+      <a href="{% url 'gestion_utilisateurs' %}" class="sidebar-link">
+        <span class="icon">👥</span> Utilisateurs
+        <span class="badge">{{ total_users }}</span>
+      </a>
+      <a href="{% url 'moderation_produits' %}" class="sidebar-link">
+        <span class="icon">🌿</span> Modération produits
+        {% if produits_en_attente %}<span class="badge">{{ produits_en_attente }}</span>{% endif %}
+      </a>
+      <a href="#" class="sidebar-link">
+        <span class="icon">📦</span> Commandes
+      </a>
+      <a href="#" class="sidebar-link">
+        <span class="icon">🚚</span> Livraisons
+      </a>
+      <a href="/admin/paiements/paiement/" class="sidebar-link">
+        <span class="icon">💳</span> Paiements
+      </a>
+
+      <span class="sidebar-section-label" style="margin-top:var(--sp-3);">Outils</span>
+      <a href="#" class="sidebar-link">
+        <span class="icon">📊</span> Rapports
+      </a>
+      <a href="{% url 'agriculteurs_inactifs' %}" class="sidebar-link">
+  <span class="icon">😴</span> Agriculteurs inactifs
+</a>
+<a href="{% url 'demande_categorie' %}" class="sidebar-link">
+  <span class="icon">📊</span> Prévisions marché
+</a>
+      <a href="/admin/" class="sidebar-link">
+        <span class="icon">🔧</span> Admin Django
+      </a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <a href="{% url 'deconnexion' %}" class="sidebar-logout">
+        <span class="icon">🚪</span> Déconnexion
+      </a>
+    </div>
+  </aside>
+
+  <div class="dash-main">
+
+    <div class="dash-topbar">
+      <div>
+        <div class="dash-topbar-title">Tableau de bord Admin</div>
+        <div style="font-size:12px; color:var(--ink-faint); margin-top:2px;">Vue d'ensemble de la plateforme</div>
+      </div>
+      <div class="dash-topbar-right">
+        <a href="{% url 'liste_notifications' %}" class="dash-notif-btn" style="text-decoration:none; position:relative;">
+  🔔
+  {% if nb_notifications_non_lues > 0 %}
+  <span class="dash-notif-dot"></span>
+  {% endif %}
+</a>
+        {% if produits_en_attente %}
+        <a href="{% url 'moderation_produits' %}" class="btn btn-lemon" style="padding:10px 20px; font-size:14px;">
+          🌿 {{ produits_en_attente }} produit{% if produits_en_attente > 1 %}s{% endif %} à valider
+        </a>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="dash-body">
+
+      <div class="stat-grid">
+        <div class="stat-card stat-lemon">
+          <span class="stat-card-label">Utilisateurs</span>
+          <div class="stat-card-value">{{ total_users }}</div>
+          <div class="stat-card-sub">Inscrits sur la plateforme</div>
+          <span class="stat-card-icon">👥</span>
+        </div>
+        <div class="stat-card stat-green">
+          <span class="stat-card-label">Produits</span>
+          <div class="stat-card-value">{{ total_produits }}</div>
+          <div class="stat-card-sub">{{ produits_en_attente }} en attente</div>
+          <span class="stat-card-icon">🌿</span>
+        </div>
+        <div class="stat-card stat-orange">
+          <span class="stat-card-label">Commandes</span>
+          <div class="stat-card-value">{{ total_commandes }}</div>
+          <div class="stat-card-sub">Total des commandes</div>
+          <span class="stat-card-icon">📦</span>
+        </div>
+        <div class="stat-card stat-blue">
+          <span class="stat-card-label">Livraisons</span>
+          <div class="stat-card-value">{{ total_livraisons }}</div>
+          <div class="stat-card-sub">En cours actuellement</div>
+          <span class="stat-card-icon">🚚</span>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1.2fr 1fr; gap:var(--sp-5);">
+
+        <!-- PRODUITS À VALIDER -->
+        <div class="dash-card">
+          <div class="dash-card-head">
+            <span class="dash-card-title">🌿 Produits en attente de validation</span>
+            <a href="{% url 'moderation_produits' %}" class="dash-card-link">Voir tout →</a>
+          </div>
+          <table class="dash-table">
+            <thead>
+              <tr>
+                <th>Produit</th>
+                <th>Agriculteur</th>
+                <th>Prix</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for produit in produits_a_valider %}
+              <tr>
+                <td>
+                  <div style="display:flex; align-items:center; gap:var(--sp-2);">
+                    <div style="width:36px; height:36px; border-radius:var(--r-sm); background:var(--lemon-soft); display:flex; align-items:center; justify-content:center; font-size:18px;">🌿</div>
+                    <span style="font-weight:600; font-size:13px;">{{ produit.nom }}</span>
+                  </div>
+                </td>
+                <td style="font-size:13px;">{{ produit.agriculteur.utilisateur.get_full_name }}</td>
+                <td style="font-family:var(--font-mono); font-weight:700; font-size:13px;">{{ produit.prix_unitaire }} CDF</td>
+                <td>
+                  <div style="display:flex; gap:var(--sp-2);">
+                    <form method="post" action="{% url 'valider_produit_admin' produit.pk %}">
+                      {% csrf_token %}
+                      <button type="submit" style="background:var(--success-soft); color:var(--success); border:none; padding:6px 10px; border-radius:var(--r-sm); font-size:12px; font-weight:700; cursor:pointer;">✓</button>
+                    </form>
+                    <form method="post" action="{% url 'refuser_produit_admin' produit.pk %}">
+                      {% csrf_token %}
+                      <button type="submit" style="background:var(--danger-soft); color:var(--danger); border:none; padding:6px 10px; border-radius:var(--r-sm); font-size:12px; font-weight:700; cursor:pointer;">✕</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="4">
+                  <div class="empty-table">
+                    <span class="empty-icon">✅</span>
+                    Aucun produit en attente. Tout est à jour !
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- DERNIERS INSCRITS -->
+        <div class="dash-card">
+          <div class="dash-card-head">
+            <span class="dash-card-title">Derniers inscrits</span>
+            <a href="{% url 'gestion_utilisateurs' %}" class="dash-card-link">Voir tout →</a>
+          </div>
+          <table class="dash-table">
+            <thead>
+              <tr>
+                <th>Utilisateur</th>
+                <th>Rôle</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for user in derniers_users %}
+              <tr>
+                <td>
+                  <div style="display:flex; align-items:center; gap:var(--sp-2);">
+                    <div style="width:32px; height:32px; border-radius:50%; background:var(--lemon); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:12px; color:var(--soil); flex-shrink:0;">
+                      {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+                    </div>
+                    <span style="font-size:13px; font-weight:500;">{{ user.get_full_name }}</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="status-badge
+                    {% if user.role == 'agriculteur' %}status-validee
+                    {% elif user.role == 'acheteur' %}status-attente
+                    {% elif user.role == 'transporteur' %}status-livraison
+                    {% else %}status-annulee{% endif %}">
+                    {{ user.get_role_display }}
+                  </span>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="2">
+                  <div class="empty-table">Aucun utilisateur.</div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

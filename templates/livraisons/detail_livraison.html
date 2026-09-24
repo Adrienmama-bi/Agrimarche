@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Livraison #{{ livraison.pk }} — AgriMarché{% endblock %}
+
+{% block content %}
+<section style="padding:var(--sp-7) 0;">
+  <div class="container" style="max-width:720px;">
+
+    <div style="font-size:13px; color:var(--ink-faint); margin-bottom:var(--sp-6);">
+      <a href="{% if est_transporteur_concerne %}{% url 'mes_livraisons' %}{% else %}{% url 'accueil' %}{% endif %}" style="color:var(--ink-faint);">
+        ← Retour
+      </a>
+    </div>
+
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:var(--sp-6); flex-wrap:wrap; gap:var(--sp-3);">
+      <h1 style="font-size:28px;">Livraison #{{ livraison.pk }}</h1>
+      <span class="status-badge
+        {% if livraison.statut == 'assignee' %}status-attente
+        {% elif livraison.statut == 'en_route' or livraison.statut == 'arrivee' %}status-livraison
+        {% elif livraison.statut == 'livree' %}status-livree
+        {% else %}status-annulee{% endif %}"
+        style="font-size:13px; padding:8px 16px;">
+        {{ livraison.get_statut_display }}
+      </span>
+    </div>
+
+  <!-- CARTE LIVE -->
+    <div style="background:var(--soil); border-radius:var(--r-lg); padding:var(--sp-5); margin-bottom:var(--sp-6);">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:var(--sp-4);">
+        <span style="font-family:var(--font-mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--lemon);">Suivi en direct</span>
+        <span id="maj-indicator" style="font-size:11px; color:rgba(255,255,255,0.4); font-family:var(--font-mono);">
+          {% if livraison.statut == 'en_route' or livraison.statut == 'arrivee' %}🟢 Position active{% else %}⚪ En attente{% endif %}
+        </span>
+      </div>
+      <div id="map" style="width:100%; height:340px; border-radius:var(--r-md); overflow:hidden;"></div>
+      <div style="margin-top:var(--sp-4); display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-4); font-size:13px;">
+        <div>
+          <div style="color:rgba(255,255,255,0.4); font-family:var(--font-mono); font-size:10px; text-transform:uppercase;">Départ</div>
+          <div style="color:var(--white); font-weight:600; margin-top:4px;">🌱 {{ livraison.commande.agriculteur.localisation }}</div>
+        </div>
+        <div>
+          <div style="color:rgba(255,255,255,0.4); font-family:var(--font-mono); font-size:10px; text-transform:uppercase;">Arrivée</div>
+          <div style="color:var(--white); font-weight:600; margin-top:4px;">🏠 {{ livraison.commande.adresse_livraison }}</div>
+        </div>
+      </div>
+      {% if livraison.distance_km %}
+      <div class="route-meta" style="margin-top:var(--sp-4); padding-top:var(--sp-4);">
+        <span>Distance estimée</span>
+        <strong>{{ livraison.distance_km }} km</strong>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- ACTIONS TRANSPORTEUR -->
+    {% if est_transporteur_concerne %}
+      {% if livraison.statut == 'assignee' %}
+      <form method="post" action="{% url 'mettre_a_jour_statut' livraison.pk 'en_route' %}" style="margin-bottom:var(--sp-5);">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-lemon btn-block btn-lg">🚚 Démarrer la livraison (en route)</button>
+      </form>
+      {% elif livraison.statut == 'en_route' %}
+      <form method="post" action="{% url 'mettre_a_jour_statut' livraison.pk 'arrivee' %}" style="margin-bottom:var(--sp-5);">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-lemon btn-block btn-lg">📍 Je suis arrivé(e)</button>
+      </form>
+      {% elif livraison.statut == 'arrivee' %}
+      <form method="post" action="{% url 'mettre_a_jour_statut' livraison.pk 'livree' %}" enctype="multipart/form-data" style="margin-bottom:var(--sp-5); background:var(--white); border:1px solid var(--line); border-radius:var(--r-lg); padding:var(--sp-5);">
+        {% csrf_token %}
+        <label style="display:block; font-size:13px; font-weight:600; margin-bottom:var(--sp-2);">Preuve de livraison (photo)</label>
+        <input type="file" name="preuve" accept="image/*" class="input" style="margin-bottom:var(--sp-4);">
+        <button type="submit" class="btn btn-lemon btn-block btn-lg">✓ Confirmer la livraison</button>
+      </form>
+      {% endif %}
+    {% endif %}
+
+    <!-- PREUVE DE LIVRAISON -->
+    {% if livraison.preuve_livraison %}
+    <div class="dash-card" style="padding:var(--sp-5); margin-bottom:var(--sp-5);">
+      <div style="font-family:var(--font-mono); font-size:10px; letter-spacing:0.12em; text-transform:uppercase; color:var(--ink-faint); margin-bottom:var(--sp-3);">Preuve de livraison</div>
+      <img src="{{ livraison.preuve_livraison.url }}" alt="Preuve" style="width:100%; max-width:300px; border-radius:var(--r-md);">
+    </div>
+    {% endif %}
+
+    <!-- INFOS -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-5);">
+      <div class="dash-card" style="padding:var(--sp-5);">
+        <div style="font-family:var(--font-mono); font-size:10px; letter-spacing:0.12em; text-transform:uppercase; color:var(--ink-faint); margin-bottom:var(--sp-3);">Transporteur</div>
+        {% if livraison.transporteur %}
+        <div style="font-weight:700; font-size:15px;">{{ livraison.transporteur.utilisateur.get_full_name }}</div>
+        <div style="font-size:13px; color:var(--ink-soft); margin-top:4px;">📞 {{ livraison.transporteur.utilisateur.telephone }}</div>
+        {% else %}
+        <div style="color:var(--ink-faint); font-size:14px;">Non assigné</div>
+        {% endif %}
+      </div>
+      <div class="dash-card" style="padding:var(--sp-5);">
+        <div style="font-family:var(--font-mono); font-size:10px; letter-spacing:0.12em; text-transform:uppercase; color:var(--ink-faint); margin-bottom:var(--sp-3);">Tarif transport</div>
+        <div style="font-family:var(--font-mono); font-weight:700; font-size:20px; color:var(--lemon-dark);">{{ livraison.tarif|default:"—" }} CDF</div>
+      </div>
+    </div>
+
+    <div style="margin-top:var(--sp-5);">
+      <a href="{% url 'detail_commande' livraison.commande.pk %}" class="btn btn-ghost btn-block">
+        Voir la commande associée →
+      </a>
+    </div>
+
+  </div>
+</section>
+<!-- LEAFLET (carte gratuite, sans clé API) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+(function() {
+  const departLat = {{ livraison.point_depart_lat|default:"-4.4419" }};
+  const departLng = {{ livraison.point_depart_lng|default:"15.2663" }};
+  const arriveeLat = {{ livraison.point_arrivee_lat|default:"-4.3276" }};
+  const arriveeLng = {{ livraison.point_arrivee_lng|default:"15.3136" }};
+
+  const map = L.map('map').setView([departLat, arriveeLat ? (departLat + arriveeLat) / 2 : departLat], 12);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap',
+    maxZoom: 18,
+  }).addTo(map);
+
+  const iconFerme = L.divIcon({
+    html: '<div style="background:#7AE600; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:16px; border:2px solid #0B1F0E;">🌱</div>',
+    iconSize: [32, 32], className: ''
+  });
+  const iconPorte = L.divIcon({
+    html: '<div style="background:#FF5500; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:16px; border:2px solid #0B1F0E;">🏠</div>',
+    iconSize: [32, 32], className: ''
+  });
+  const iconTruck = L.divIcon({
+    html: '<div style="background:#0B1F0E; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px; border:2px solid #7AE600;">🚚</div>',
+    iconSize: [36, 36], className: ''
+  });
+
+  const markerDepart = L.marker([departLat, departLng], { icon: iconFerme }).addTo(map);
+  const markerArrivee = L.marker([arriveeLat, arriveeLng], { icon: iconPorte }).addTo(map);
+  L.polyline([[departLat, departLng], [arriveeLat, arriveeLng]], { color: '#7AE600', weight: 2, dashArray: '6,8' }).addTo(map);
+
+  const bounds = L.latLngBounds([[departLat, departLng], [arriveeLat, arriveeLng]]);
+  map.fitBounds(bounds, { padding: [40, 40] });
+
+  let truckMarker = null;
+
+  function placerCamion(lat, lng) {
+    if (!lat || !lng) return;
+    if (truckMarker) {
+      truckMarker.setLatLng([lat, lng]);
+    } else {
+      truckMarker = L.marker([lat, lng], { icon: iconTruck }).addTo(map);
+    }
+  }
+
+  {% if livraison.position_actuelle_lat %}
+  placerCamion({{ livraison.position_actuelle_lat }}, {{ livraison.position_actuelle_lng }});
+  {% endif %}
+
+  {% if est_transporteur_concerne and livraison.statut == 'en_route' %}
+  // Le transporteur envoie sa position toutes les 8 secondes
+  function envoyerPosition() {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(function(pos) {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+      placerCamion(lat, lng);
+      fetch("{% url 'mettre_a_jour_position' livraison.pk %}", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-CSRFToken': '{{ csrf_token }}',
+        },
+        body: lat=${lat}&lng=${lng},
+      });
+    }, function(err) {
+      console.log('Géolocalisation refusée ou indisponible.');
+    });
+  }
+  envoyerPosition();
+  setInterval(envoyerPosition, 8000);
+  {% endif %}
+
+  {% if not est_transporteur_concerne %}
+  // L'acheteur / agriculteur récupère la position toutes les 6 secondes
+  function rafraichirPosition() {
+    fetch("{% url 'position_livraison' livraison.pk %}")
+      .then(r => r.json())
+      .then(data => {
+        if (data.ok && data.lat && data.lng) {
+          placerCamion(data.lat, data.lng);
+          const indicator = document.getElementById('maj-indicator');
+          if (indicator && data.derniere_maj) {
+            indicator.textContent = '🟢 Mis à jour à ' + data.derniere_maj;
+          }
+        }
+      });
+  }
+  rafraichirPosition();
+  setInterval(rafraichirPosition, 6000);
+  {% endif %}
+})();
+</script>
+{% endblock %}

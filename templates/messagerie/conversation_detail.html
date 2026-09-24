@@ -1,0 +1,96 @@
+{% extends 'base_auth.html' %}
+{% load static %}
+{% block title %}Conversation — AgriMarché{% endblock %}
+
+{% block content %}
+<div class="dash-shell">
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <svg width="30" height="30" viewBox="0 0 36 36" fill="none">
+        <circle cx="18" cy="18" r="18" fill="#0B1F0E"/>
+        <path d="M18 6 C10 10 8 20 12 28 C14 24 16 20 18 18 C20 20 22 24 24 28 C28 20 26 10 18 6Z" fill="#7AE600"/>
+        <line x1="18" y1="8" x2="18" y2="27" stroke="#0B1F0E" stroke-width="1.2" stroke-linecap="round"/>
+        <line x1="18" y1="13" x2="13" y2="17" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+        <line x1="18" y1="17" x2="13" y2="21" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+        <line x1="18" y1="13" x2="23" y2="17" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+        <line x1="18" y1="17" x2="23" y2="21" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+      </svg>
+      <span class="sidebar-brand-text">Agri<span>Marché</span></span>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="sidebar-user-avatar" style="background:{% if request.user.est_agriculteur %}var(--agriculteur){% elif request.user.est_acheteur %}var(--acheteur){% elif request.user.est_transporteur %}var(--transporteur){% else %}var(--lemon){% endif %};">
+        {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
+      </div>
+      <div class="sidebar-user-name">{{ request.user.get_full_name }}</div>
+      <span class="sidebar-user-role role-badge-{{ request.user.role }}">{{ request.user.get_role_display }}</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <span class="sidebar-section-label">Principal</span>
+      <a href="{% url 'dashboard' %}" class="sidebar-link">
+        <span class="icon">🏠</span> Tableau de bord
+      </a>
+      <a href="{% url 'boite_reception' %}" class="sidebar-link is-active">
+        <span class="icon">💬</span> Messagerie
+      </a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <a href="{% url 'deconnexion' %}" class="sidebar-logout">
+        <span class="icon">🚪</span> Déconnexion
+      </a>
+    </div>
+  </aside>
+
+  <div class="dash-main" style="display:flex; flex-direction:column; height:100vh;">
+
+    <div class="dash-topbar">
+      <div style="display:flex; align-items:center; gap:var(--sp-3);">
+        <a href="{% url 'boite_reception' %}" style="font-size:18px; color:var(--ink-faint);">←</a>
+        <div style="width:38px; height:38px; border-radius:50%; background:var(--lemon-soft); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; color:var(--lemon-dark);">
+          {{ autre_participant.first_name|first|upper }}
+        </div>
+        <div>
+          <div class="dash-topbar-title" style="font-size:15px;">{{ autre_participant.get_full_name }}</div>
+          <div style="font-size:11px; color:var(--ink-faint);">{{ autre_participant.get_role_display }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ZONE MESSAGES -->
+    <div id="messages-zone" style="flex:1; overflow-y:auto; padding:var(--sp-6); display:flex; flex-direction:column; gap:var(--sp-3); background:#F6FBF0;">
+      {% for msg in messages_liste %}
+      <div style="display:flex; {% if msg.expediteur == request.user %}justify-content:flex-end;{% else %}justify-content:flex-start;{% endif %}">
+        <div style="max-width:60%; padding:var(--sp-3) var(--sp-4); border-radius:var(--r-lg); {% if msg.expediteur == request.user %}background:var(--lemon); color:var(--soil); border-bottom-right-radius:4px;{% else %}background:var(--white); border:1px solid var(--line); border-bottom-left-radius:4px;{% endif %}">
+          <div style="font-size:14px; line-height:1.5;">{{ msg.contenu }}</div>
+          <div style="font-size:10px; margin-top:4px; opacity:0.6; font-family:var(--font-mono);">
+            {{ msg.date_envoi|date:"H:i" }}
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <div style="text-align:center; padding:var(--sp-8); color:var(--ink-faint);">
+        <span style="font-size:40px; display:block; margin-bottom:var(--sp-3);">👋</span>
+        Démarrez la conversation avec {{ autre_participant.first_name }}.
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- ZONE SAISIE -->
+    <form method="post" style="padding:var(--sp-4) var(--sp-6); background:var(--white); border-top:1px solid var(--line); display:flex; gap:var(--sp-3);">
+      {% csrf_token %}
+      <input type="text" name="contenu" class="input" placeholder="Écrivez votre message..." autocomplete="off" required style="flex:1;">
+      <button type="submit" class="btn btn-lemon" style="padding:13px 24px;">Envoyer →</button>
+    </form>
+
+  </div>
+</div>
+
+<script>
+  const zone = document.getElementById('messages-zone');
+  zone.scrollTop = zone.scrollHeight;
+</script>
+
+{% endblock %}

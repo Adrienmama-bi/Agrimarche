@@ -1,0 +1,172 @@
+{% extends 'base_auth.html' %}
+{% load static %}
+{% block title %}Espace Transporteur — AgriMarché{% endblock %}
+
+{% block content %}
+<div class="dash-shell">
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <svg width="30" height="30" viewBox="0 0 36 36" fill="none">
+        <circle cx="18" cy="18" r="18" fill="#0B1F0E"/>
+        <path d="M18 6 C10 10 8 20 12 28 C14 24 16 20 18 18 C20 20 22 24 24 28 C28 20 26 10 18 6Z" fill="#7AE600"/>
+        <line x1="18" y1="8" x2="18" y2="27" stroke="#0B1F0E" stroke-width="1.2" stroke-linecap="round"/>
+        <line x1="18" y1="13" x2="13" y2="17" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+        <line x1="18" y1="17" x2="13" y2="21" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+        <line x1="18" y1="13" x2="23" y2="17" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+        <line x1="18" y1="17" x2="23" y2="21" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+      </svg>
+      <span class="sidebar-brand-text">Agri<span>Marché</span></span>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="sidebar-user-avatar" style="background:var(--transporteur);">
+        {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
+      </div>
+      <div class="sidebar-user-name">{{ request.user.get_full_name }}</div>
+      <span class="sidebar-user-role role-badge-transporteur">Transporteur</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <span class="sidebar-section-label">Principal</span>
+      <a href="{% url 'dashboard_transporteur' %}" class="sidebar-link is-active">
+        <span class="icon">🏠</span> Tableau de bord
+      </a>
+     <a href="{% url 'missions_disponibles' %}" class="sidebar-link">
+       <span class="icon">📋</span> Missions disponibles
+     </a>
+     <a href="{% url 'mes_livraisons' %}" class="sidebar-link">
+       <span class="icon">🚚</span> Mes livraisons
+     </a>
+      <a href="{% url 'mes_livraisons' %}" class="sidebar-link">
+        <span class="icon">📅</span> Mon planning
+      </a>
+
+      <span class="sidebar-section-label" style="margin-top:var(--sp-3);">Compte</span>
+      <a href="{% url 'mon_profil' %}" class="sidebar-link">
+  <span class="icon">👤</span> Mon profil
+</a>
+      <a href="{% url 'gestion_vehicules' %}" class="sidebar-link">
+  <span class="icon">🚛</span> Mon véhicule
+</a>
+         <a href="{% url 'boite_reception'%}" class="sidebar-link">
+        <span class="icon">💬</span> Messagerie
+      </a>
+      <a href="{% url 'itineraire_optimal' %}" class="sidebar-link">
+  <span class="icon">🗺️</span> Itinéraire optimal
+</a>
+      <a href="{% url 'dashboard_transporteur' %}" class="sidebar-link">
+        <span class="icon">💰</span> Mes revenus
+      </a>
+     <a href="{% url 'mes_avis' %}" class="sidebar-link">
+  <span class="icon">⭐</span> Mes avis
+</a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <a href="{% url 'deconnexion' %}" class="sidebar-logout">
+        <span class="icon">🚪</span> Déconnexion
+      </a>
+    </div>
+  </aside>
+
+  <div class="dash-main">
+
+    <div class="dash-topbar">
+      <div>
+        <div class="dash-topbar-title">Bonjour, {{ request.user.first_name }} 👋</div>
+        <div style="font-size:12px; color:var(--ink-faint); margin-top:2px;">
+          {% if profil.disponible %}
+            <span style="color:var(--success);">● Disponible</span>
+          {% else %}
+            <span style="color:var(--danger);">● Indisponible</span>
+          {% endif %}
+        </div>
+      </div>
+      <div class="dash-topbar-right">
+        <a href="{% url 'liste_notifications' %}" class="dash-notif-btn" style="text-decoration:none; position:relative;">
+  🔔
+  {% if nb_notifications_non_lues > 0 %}
+  <span class="dash-notif-dot"></span>
+  {% endif %}
+</a>
+        <a href="{% url 'missions_disponibles' %}" class="btn btn-lemon" style="padding:10px 20px; font-size:14px;">📋 Voir les missions</a>
+      </div>
+    </div>
+
+    <div class="dash-body">
+
+      <div class="stat-grid">
+        <div class="stat-card stat-blue">
+          <span class="stat-card-label">Total missions</span>
+          <div class="stat-card-value">{{ total_missions }}</div>
+          <div class="stat-card-sub">Depuis votre inscription</div>
+          <span class="stat-card-icon">🚚</span>
+        </div>
+        <div class="stat-card stat-lemon">
+          <span class="stat-card-label">Missions actives</span>
+          <div class="stat-card-value">{{ missions_actives }}</div>
+          <div class="stat-card-sub">En cours maintenant</div>
+          <span class="stat-card-icon">📍</span>
+        </div>
+        <div class="stat-card stat-green">
+          <span class="stat-card-label">Revenus totaux</span>
+          <div class="stat-card-value" style="font-size:26px;">{{ revenus }}</div>
+          <div class="stat-card-sub">CDF gagnés</div>
+          <span class="stat-card-icon">💰</span>
+        </div>
+        <div class="stat-card stat-orange">
+          <span class="stat-card-label">Note moyenne</span>
+          <div class="stat-card-value">{{ profil.note_moyenne }}</div>
+          <div class="stat-card-sub">Sur 5 étoiles</div>
+          <span class="stat-card-icon">⭐</span>
+        </div>
+      </div>
+
+      <div class="dash-card">
+        <div class="dash-card-head">
+          <span class="dash-card-title">Mes missions récentes</span>
+          <a href="#" class="dash-card-link">Voir tout →</a>
+        </div>
+        <table class="dash-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Distance</th>
+              <th>Tarif</th>
+              <th>Date</th>
+              <th>Statut</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for mission in missions_recentes %}
+            <tr>
+              <td><span style="font-family:var(--font-mono); font-size:12px; color:var(--ink-faint);">#{{ mission.pk }}</span></td>
+              <td style="font-family:var(--font-mono);">{{ mission.distance_km|default:"—" }} km</td>
+              <td style="font-family:var(--font-mono); font-weight:700;">{{ mission.tarif|default:"—" }} CDF</td>
+              <td style="color:var(--ink-soft);">{{ mission.date_creation|date:"d/m/Y" }}</td>
+              <td>
+                <span class="status-badge status-livraison">{{ mission.get_statut_display }}</span>
+              </td>
+              <td><a href="#" style="font-size:13px; font-weight:600; color:var(--lemon-dark);">Détails →</a></td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="6">
+                <div class="empty-table">
+                  <span class="empty-icon">🚚</span>
+                  Aucune mission pour l'instant.
+                  <a href="#" style="color:var(--transporteur-dark); font-weight:700; display:block; margin-top:var(--sp-2);">Voir les missions disponibles →</a>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

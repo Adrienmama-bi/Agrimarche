@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <span class="eyebrow">Mon espace</span>
+    <h2 style="margin-top:12px">Bonjour {{ utilisateur.first_name }}</h2>
+    <p class="lede">Vous êtes connecté en tant que <strong>{{ utilisateur.get_role_display }}</strong>. Le tableau de bord complet arrive à l'étape suivante.</p>
+  </div>
+</section>
+{% endblock %}

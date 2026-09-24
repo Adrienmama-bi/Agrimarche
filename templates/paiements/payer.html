@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Paiement — AgriMarché{% endblock %}
+
+{% block content %}
+<section style="padding:var(--sp-7) 0; background:var(--bg-soft); min-height:80vh;">
+  <div class="container" style="max-width:560px;">
+
+    <!-- ÉTAPES -->
+    <div style="display:flex; align-items:center; gap:var(--sp-3); margin-bottom:var(--sp-6); font-family:var(--font-mono); font-size:12px;">
+      <span style="color:var(--lemon-dark); font-weight:700;">1. Commande ✓</span>
+      <span style="color:var(--ink-faint);">→</span>
+      <span style="color:var(--soil); font-weight:700;">2. Paiement</span>
+      <span style="color:var(--ink-faint);">→</span>
+      <span style="color:var(--ink-faint);">3. Confirmation</span>
+    </div>
+
+    <div style="background:var(--white); border-radius:var(--r-lg); padding:var(--sp-7); box-shadow:var(--shadow-md);">
+
+      <h1 style="font-size:24px; margin-bottom:var(--sp-2);">Finaliser le paiement</h1>
+      <p style="color:var(--ink-soft); font-size:14px; margin-bottom:var(--sp-6);">
+        Commande #{{ commande.pk }} — {{ commande.agriculteur.utilisateur.get_full_name }}
+      </p>
+
+      <!-- RÉCAPITULATIF -->
+      <div style="background:var(--bg-soft); border-radius:var(--r-md); padding:var(--sp-4); margin-bottom:var(--sp-6);">
+        {% for ligne in commande.lignes.all %}
+        <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:8px;">
+          <span>{{ ligne.quantite }} {{ ligne.produit.get_unite_display }} — {{ ligne.produit.nom }}</span>
+          <span style="font-family:var(--font-mono);">{{ ligne.sous_total }} FCFA</span>
+        </div>
+        {% endfor %}
+        <div style="border-top:1px solid var(--line); margin-top:var(--sp-3); padding-top:var(--sp-3); display:flex; justify-content:space-between;">
+          <strong>Total à payer</strong>
+          <strong style="font-family:var(--font-mono); color:var(--lemon-dark); font-size:18px;">{{ commande.montant_total }} CDF</strong>
+        </div>
+      </div>
+
+      <form method="post" id="payment-form">
+        {% csrf_token %}
+
+        <label style="display:block; font-size:13px; font-weight:600; margin-bottom:var(--sp-3);">Choisissez votre méthode de paiement</label>
+
+        <div style="display:grid; gap:var(--sp-3); margin-bottom:var(--sp-5);">
+
+          <label class="payment-option">
+            <input type="radio" name="methode" value="mobile_money" checked>
+            <div style="flex:1;">
+              <div style="font-weight:600; font-size:14px;">📱 Mobile Money</div>
+              <div style="font-size:12px; color:var(--ink-faint);">M-Pesa, Airtel Money, Orange Money</div>
+            </div>
+          </label>
+
+          <label class="payment-option">
+            <input type="radio" name="methode" value="carte">
+            <div style="flex:1;">
+              <div style="font-weight:600; font-size:14px;">💳 Carte bancaire</div>
+              <div style="font-size:12px; color:var(--ink-faint);">Visa, Mastercard</div>
+            </div>
+          </label>
+
+          <label class="payment-option">
+            <input type="radio" name="methode" value="especes">
+            <div style="flex:1;">
+              <div style="font-weight:600; font-size:14px;">💵 Espèces à la livraison</div>
+              <div style="font-size:12px; color:var(--ink-faint);">Payez quand vous recevez votre commande</div>
+            </div>
+          </label>
+
+        </div>
+
+        <div class="field" id="numero-field">
+          <label>Numéro de téléphone Mobile Money</label>
+          <input type="text" name="numero" class="input" placeholder="+243 81 234 5678">
+        </div>
+
+        <button type="submit" class="btn btn-lemon btn-block btn-lg">
+          Continuer →
+        </button>
+
+        <p style="font-size:11px; color:var(--ink-faint); text-align:center; margin-top:var(--sp-3);">
+          🔒 Paiement sécurisé. Vos informations ne sont jamais stockées sur nos serveurs.
+        </p>
+      </form>
+
+    </div>
+  </div>
+</section>
+
+<style>
+.payment-option {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  border: 1.5px solid var(--line);
+  border-radius: var(--r-md);
+  padding: var(--sp-4);
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+.payment-option:hover { background: var(--bg-soft); }
+.payment-option input { accent-color: var(--lemon); width: 18px; height: 18px; }
+.payment-option:has(input:checked) {
+  border-color: var(--lemon);
+  background: var(--lemon-soft);
+}
+</style>
+
+<script>
+  const radios = document.querySelectorAll('input[name="methode"]');
+  const numeroField = document.getElementById('numero-field');
+
+  function toggleNumero() {
+    const selected = document.querySelector('input[name="methode"]:checked').value;
+    numeroField.style.display = selected === 'mobile_money' ? 'block' : 'none';
+  }
+  radios.forEach(r => r.addEventListener('change', toggleNumero));
+  toggleNumero();
+</script>
+
+{% endblock %}

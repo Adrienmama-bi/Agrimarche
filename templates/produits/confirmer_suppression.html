@@ -1,0 +1,23 @@
+{% extends 'base_auth.html' %}
+{% block title %}Supprimer {{ produit.nom }} — AgriMarché{% endblock %}
+
+{% block content %}
+<div style="min-height:100vh; display:flex; align-items:center; justify-content:center; background:var(--bg-soft); padding:var(--sp-5);">
+  <div style="background:var(--white); border-radius:var(--r-lg); padding:var(--sp-8); max-width:480px; width:100%; text-align:center; box-shadow:var(--shadow-lg);">
+    <div style="font-size:56px; margin-bottom:var(--sp-4);">🗑️</div>
+    <h2 style="font-size:24px; margin-bottom:var(--sp-3);">Supprimer ce produit ?</h2>
+    <p style="color:var(--ink-soft); margin-bottom:var(--sp-6); font-size:15px;">
+      Vous êtes sur le point de supprimer <strong>{{ produit.nom }}</strong>. Cette action est irréversible.
+    </p>
+    <div style="display:flex; gap:var(--sp-3); justify-content:center;">
+      <a href="{% url 'mes_produits' %}" class="btn btn-ghost btn-lg">Annuler</a>
+      <form method="post" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-lg" style="background:var(--danger); color:var(--white); border-color:var(--danger);">
+          Oui, supprimer
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,183 @@
+{% extends 'base_auth.html' %}
+{% load static %}
+{% block title %}Modifier {{ produit.nom }} — AgriMarché{% endblock %}
+
+{% block content %}
+<div class="dash-shell">
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <svg width="30" height="30" viewBox="0 0 36 36" fill="none">
+        <circle cx="18" cy="18" r="18" fill="#0B1F0E"/>
+        <path d="M18 6 C10 10 8 20 12 28 C14 24 16 20 18 18 C20 20 22 24 24 28 C28 20 26 10 18 6Z" fill="#7AE600"/>
+        <line x1="18" y1="8" x2="18" y2="27" stroke="#0B1F0E" stroke-width="1.2" stroke-linecap="round"/>
+        <line x1="18" y1="13" x2="13" y2="17" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+        <line x1="18" y1="17" x2="13" y2="21" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+        <line x1="18" y1="13" x2="23" y2="17" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+        <line x1="18" y1="17" x2="23" y2="21" stroke="#0B1F0E" stroke-width="0.8" stroke-linecap="round"/>
+      </svg>
+      <span class="sidebar-brand-text">Agri<span>Marché</span></span>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="sidebar-user-avatar" style="background:var(--agriculteur);">
+        {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
+      </div>
+      <div class="sidebar-user-name">{{ request.user.get_full_name }}</div>
+      <span class="sidebar-user-role role-badge-agriculteur">Agriculteur</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <span class="sidebar-section-label">Principal</span>
+      <a href="{% url 'dashboard_agriculteur' %}" class="sidebar-link">
+        <span class="icon">🏠</span> Tableau de bord
+      </a>
+      <a href="{% url 'publier_produit' %}" class="sidebar-link">
+        <span class="icon">➕</span> Publier un produit
+      </a>
+      <a href="{% url 'mes_produits' %}" class="sidebar-link is-active">
+        <span class="icon">🌿</span> Mes produits
+      </a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <a href="{% url 'deconnexion' %}" class="sidebar-logout">
+        <span class="icon">🚪</span> Déconnexion
+      </a>
+    </div>
+  </aside>
+
+  <div class="dash-main">
+
+    <div class="dash-topbar">
+      <div>
+        <div class="dash-topbar-title">Modifier : {{ produit.nom }}</div>
+        <div style="font-size:12px; color:var(--ink-faint); margin-top:2px;">
+          Mettez à jour les informations de votre annonce
+        </div>
+      </div>
+      <a href="{% url 'mes_produits' %}" class="btn btn-ghost" style="padding:10px 20px; font-size:14px;">
+        ← Mes produits
+      </a>
+    </div>
+
+    <div class="dash-body">
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div style="display:grid; grid-template-columns:1.4fr 1fr; gap:var(--sp-6); align-items:start;">
+
+          <div>
+            <div class="dash-card" style="margin-bottom:var(--sp-5);">
+              <div class="dash-card-head">
+                <span class="dash-card-title">Informations principales</span>
+              </div>
+              <div style="padding:var(--sp-5);">
+                <div class="field">
+                  <label>Nom du produit *</label>
+                  <input type="text" name="nom" class="input" value="{{ form.nom.value|default:'' }}" required>
+                </div>
+                <div class="field">
+                  <label>Catégorie</label>
+                  <select name="categorie" class="input">
+                    <option value="">Choisir une catégorie</option>
+                    {% for cat in form.fields.categorie.queryset %}
+                    <option value="{{ cat.pk }}" {% if form.categorie.value == cat.pk|stringformat:"s" %}selected{% endif %}>
+                      {{ cat.nom }}
+                    </option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="field">
+                  <label>Description</label>
+                  <textarea name="description" class="input" rows="4">{{ form.description.value|default:'' }}</textarea>
+                </div>
+                <div class="field">
+                  <label>Localisation</label>
+                  <input type="text" name="localisation" class="input" value="{{ form.localisation.value|default:'' }}">
+                </div>
+                <label style="display:flex; align-items:center; gap:var(--sp-2); font-size:14px; cursor:pointer;">
+                  <input type="checkbox" name="est_bio" {% if form.est_bio.value %}checked{% endif %} style="accent-color:var(--lemon); width:16px; height:16px;">
+                  <span>🌿 Produit bio</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="dash-card">
+              <div class="dash-card-head">
+                <span class="dash-card-title">Ajouter des photos</span>
+              </div>
+              <div style="padding:var(--sp-5);">
+                {% if produit.photos.all %}
+                <div style="display:flex; flex-wrap:wrap; gap:var(--sp-2); margin-bottom:var(--sp-4);">
+                  {% for photo in produit.photos.all %}
+                  <img src="{{ photo.image.url }}" alt=""
+                    style="width:72px; height:72px; object-fit:cover; border-radius:var(--r-md); border:2px solid {% if photo.est_principale %}var(--lemon){% else %}var(--line){% endif %};">
+                  {% endfor %}
+                </div>
+                {% endif %}
+                <input type="file" name="photos" multiple accept="image/*" class="input" style="padding:10px;">
+                <span style="font-size:12px; color:var(--ink-faint); margin-top:6px; display:block;">Les nouvelles photos seront ajoutées aux existantes.</span>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="dash-card" style="margin-bottom:var(--sp-5);">
+              <div class="dash-card-head">
+                <span class="dash-card-title">Prix & Stock</span>
+              </div>
+              <div style="padding:var(--sp-5);">
+                <div class="field">
+                  <label>Prix unitaire (CDF)</label>
+                  <input type="number" name="prix_unitaire" class="input" value="{{ form.prix_unitaire.value|default:'' }}" step="0.01">
+                </div>
+                <div class="field">
+                  <label>Unité</label>
+                  <select name="unite" class="input">
+                    {% for value, label in form.fields.unite.choices %}
+                    <option value="{{ value }}" {% if form.unite.value == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="field">
+                  <label>Quantité disponible</label>
+                  <input type="number" name="quantite_disponible" class="input" value="{{ form.quantite_disponible.value|default:'' }}" step="0.5">
+                </div>
+                <div class="field" style="margin-bottom:0;">
+                  <label>Quantité minimum de commande</label>
+                  <input type="number" name="quantite_min_commande" class="input" value="{{ form.quantite_min_commande.value|default:'1' }}" step="0.5">
+                </div>
+              </div>
+            </div>
+
+            <div class="dash-card" style="margin-bottom:var(--sp-5);">
+              <div class="dash-card-head">
+                <span class="dash-card-title">Dates</span>
+              </div>
+              <div style="padding:var(--sp-5);">
+                <div class="field">
+                  <label>Date de récolte</label>
+                  <input type="date" name="date_recolte" class="input" value="{{ form.date_recolte.value|default:'' }}">
+                </div>
+                <div class="field" style="margin-bottom:0;">
+                  <label>Date d'expiration</label>
+                  <input type="date" name="date_expiration" class="input" value="{{ form.date_expiration.value|default:'' }}">
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-lemon btn-block btn-lg">
+              Enregistrer les modifications →
+            </button>
+            <a href="{% url 'mes_produits' %}" class="btn btn-ghost btn-block" style="margin-top:var(--sp-3);">
+              Annuler
+            </a>
+          </div>
+
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

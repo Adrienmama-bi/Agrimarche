@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Carte des produits — AgriMarché{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+#carte { height: calc(100vh - 140px); border-radius: var(--r-lg); overflow: hidden; }
+.filtre-bar { background: var(--white); border-bottom: 1px solid var(--line); padding: 12px var(--sp-5); display: flex; gap: var(--sp-3); align-items: center; flex-wrap: wrap; }
+.produit-popup { min-width: 200px; }
+.produit-popup img { width: 100%; height: 100px; object-fit: cover; border-radius: 6px; margin-bottom: 8px; }
+.produit-popup .nom { font-weight: 700; font-size: 14px; margin-bottom: 3px; }
+.produit-popup .prix { font-weight: 700; color: var(--lemon-dark); font-size: 13px; }
+.produit-popup .agriculteur { font-size: 11px; color: var(--ink-faint); margin-bottom: 6px; }
+.produit-popup .bio { background: var(--lemon); color: var(--soil); font-size: 9px; font-weight: 800; padding: 2px 7px; border-radius: 20px; display: inline-block; margin-bottom: 4px; }
+.cluster-badge { background: var(--soil); color: var(--lemon); border: 2px solid var(--lemon); border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Barre de filtres -->
+<div class="filtre-bar">
+  <div style="display:flex; align-items:center; gap:10px;">
+    <span style="font-size:18px;">🗺️</span>
+    <strong style="font-size:15px;">Carte des produits</strong>
+    <span style="font-size:12px; color:var(--ink-faint);">{{ nb_produits }} produit{{ nb_produits|pluralize }} géolocalisé{{ nb_produits|pluralize }}</span>
+  </div>
+
+  <form method="get" style="display:flex; gap:var(--sp-3); align-items:center; margin-left:auto;">
+    <select name="categorie" class="input" style="width:auto;" onchange="this.form.submit()">
+      <option value="">Toutes catégories</option>
+      {% for cat in categories %}
+      <option value="{{ cat.pk }}" {% if cat.pk|stringformat:"s" == categorie_id %}selected{% endif %}>{{ cat.icone }} {{ cat.nom }}</option>
+      {% endfor %}
+    </select>
+    <a href="{% url 'catalogue' %}" class="btn btn-ghost" style="padding:8px 16px; font-size:13px;">☰ Vue liste</a>
+  </form>
+</div>
+
+<!-- Carte -->
+<div id="carte"></div>
+
+<!-- Ma position -->
+<button onclick="maPosition()" style="position:fixed; bottom:24px; right:24px; z-index:1000; background:var(--soil); color:var(--lemon); border:none; border-radius:50%; width:50px; height:50px; font-size:20px; cursor:pointer; box-shadow:var(--shadow-lg);" title="Ma position">📍</button>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const MARKERS_DATA = {{ markers_json|safe }};
+
+// Initialiser la carte centrée sur le Cameroun
+const carte = L.map('carte', {
+  center: [-3.848, 11.502],
+  zoom: 6,
+  zoomControl: true,
+});
+
+// Tuiles OpenStreetMap
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+  maxZoom: 19,
+}).addTo(carte);
+
+// Icône personnalisée pour les produits
+function creerIcone(estBio, categorieIcone) {
+  return L.divIcon({
+    className: '',
+    html: `<div style="
+      background:${estBio ? '#7AE600' : '#0B1F0E'};
+      color:${estBio ? '#0B1F0E' : '#7AE600'};
+      border:2px solid ${estBio ? '#4A9900' : '#7AE600'};
+      border-radius:50%;
+      width:36px; height:36px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:16px;
+      box-shadow:0 2px 8px rgba(0,0,0,0.3);
+    ">${categorieIcone || '🌿'}</div>`,
+    iconSize: [36, 36],
+    iconAnchor: [18, 18],
+    popupAnchor: [0, -20],
+  });
+}
+
+// Ajouter les marqueurs
+const bounds = [];
+
+MARKERS_DATA.forEach(function(m) {
+  const marker = L.marker(
+    [m.lat, m.lng],
+    { icon: creerIcone(m.est_bio, m.categorie_icone) }
+  ).addTo(carte);
+
+  const popupContent = `
+    <div class="produit-popup">
+      ${m.photo ? <img src="${m.photo}" alt="${m.nom}" onerror="this.style.display='none'"> : ''}
+      ${m.est_bio ? '<span class="bio">BIO</span>' : ''}
+      <div class="nom">${m.nom}</div>
+      <div class="agriculteur">🌾 ${m.agriculteur}</div>
+      <div class="prix">${m.prix} CFA / ${m.unite}</div>
+      <div style="font-size:11px; color:var(--ink-faint); margin-top:4px;">📍 ${m.localisation}</div>
+      <a href="${m.url}" style="display:block; margin-top:8px; background:var(--lemon); color:var(--soil); padding:6px 12px; border-radius:6px; text-decoration:none; font-weight:700; font-size:12px; text-align:center;">Voir le produit →</a>
+    </div>
+  `;
+
+  marker.bindPopup(popupContent, { maxWidth: 220 });
+  bounds.push([m.lat, m.lng]);
+});
+
+// Ajuster la vue pour voir tous les marqueurs
+if (bounds.length > 0) {
+  carte.fitBounds(bounds, { padding: [40, 40] });
+}
+
+// Ma position
+function maPosition() {
+  if (!navigator.geolocation) {
+    alert('Géolocalisation non supportée.');
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(function(pos) {
+    const lat = pos.coords.latitude;
+    const lng = pos.coords.longitude;
+
+    // Envoyer au serveur
+    fetch('/assistant/position/maj/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': '{{ csrf_token }}',
+      },
+      body: JSON.stringify({ lat, lng }),
+    });
+
+    // Marqueur "Vous êtes ici"
+    const moi = L.marker([lat, lng], {
+      icon: L.divIcon({
+        className: '',
+        html: <div style="background:#FF5500;color:#fff;border:3px solid #fff;border-radius:50%;width:20px;height:20px;box-shadow:0 0 0 3px rgba(255,85,0,0.3);"></div>,
+        iconSize: [20, 20],
+        iconAnchor: [10, 10],
+      })
+    }).addTo(carte).bindPopup('📍 Vous êtes ici').openPopup();
+
+    carte.setView([lat, lng], 12);
+
+    // Cercle de rayon
+    L.circle([lat, lng], {
+      color: '#FF5500',
+      fillColor: '#FF5500',
+      fillOpacity: 0.05,
+      radius: 50000, // 50 km
+    }).addTo(carte);
+  }, function() {
+    alert('Impossible d\'obtenir votre position.');
+  });
+}
+
+// Légende
+const legende = L.control({ position: 'bottomleft' });
+legende.onAdd = function() {
+  const div = L.DomUtil.create('div');
+  div.innerHTML = `
+    <div style="background:white;padding:12px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.15);font-size:12px;">
+      <div style="font-weight:700;margin-bottom:8px;">Légende</div>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+        <div style="width:16px;height:16px;border-radius:50%;background:#7AE600;border:2px solid #4A9900;"></div> Produit bio
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+        <div style="width:16px;height:16px;border-radius:50%;background:#0B1F0E;border:2px solid #7AE600;"></div> Produit standard
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <div style="width:16px;height:16px;border-radius:50%;background:#FF5500;border:3px solid white;"></div> Votre position
+      </div>
+    </div>
+  `;
+  return div;
+};
+legende.addTo(carte);
+</script>
+{% endblock %}
