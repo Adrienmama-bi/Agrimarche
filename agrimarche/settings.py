@@ -1,5 +1,24 @@
 from pathlib import Path
 
+# PWA
+PWA_APP_NAME = 'AgriMarché'
+PWA_APP_DESCRIPTION = 'Du champ directement à votre porte — Cameroun'
+PWA_APP_THEME_COLOR = '#0B1F0E'
+PWA_APP_BACKGROUND_COLOR = '#0B1F0E'
+PWA_APP_DISPLAY = 'standalone'
+PWA_APP_SCOPE = '/'
+PWA_APP_ORIENTATION = 'portrait-primary'
+PWA_APP_START_URL = '/'
+PWA_APP_LANG = 'fr-FR'
+
+# Fichiers statiques
+
+
+STATIC_URL = '/static/'
+
+# Service Worker accessible depuis la racine
+
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-changez-cette-cle-en-production-agrimarche-2025'
 DEBUG = True
@@ -84,6 +103,8 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+WHITENOISE_ROOT = BASE_DIR / 'static'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'

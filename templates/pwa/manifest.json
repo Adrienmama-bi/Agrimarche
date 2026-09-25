@@ -1,0 +1,21 @@
+{
+  "name": "AgriMarché",
+  "short_name": "AgriMarché",
+  "description": "Du champ directement à votre porte — Plateforme agricole camerounaise",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0B1F0E",
+  "theme_color": "#0B1F0E",
+  "orientation": "portrait-primary",
+  "lang": "fr",
+  "scope": "/",
+  "icons": [
+    { "src": "/static/icons/icon-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable any" },
+    { "src": "/static/icons/icon-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable any" },
+    { "src": "/static/icons/icon-144x144.png", "sizes": "144x144", "type": "image/png", "purpose": "maskable any" }
+  ],
+  "shortcuts": [
+    { "name": "Catalogue", "url": "/produits/catalogue/", "icons": [{ "src": "/static/icons/icon-96x96.png", "sizes": "96x96" }] },
+    { "name": "Mon dashboard", "url": "/dashboard/", "icons": [{ "src": "/static/icons/icon-96x96.png", "sizes": "96x96" }] }
+  ]
+}

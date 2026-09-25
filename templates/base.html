@@ -2,6 +2,26 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+<!-- PWA Meta Tags -->
+<meta name="theme-color" content="#0B1F0E">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="AgriMarché">
+<meta name="msapplication-TileColor" content="#0B1F0E">
+<meta name="msapplication-TileImage" content="/static/icons/icon-144x144.png">
+
+<!-- Manifest PWA -->
+<link rel="manifest" href="/manifest.json">
+
+<!-- Apple Touch Icons -->
+<link rel="apple-touch-icon" href="/static/icons/icon-152x152.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/static/icons/icon-192x192.png">
+
+<!-- Favicons -->
+<link rel="icon" type="image/png" sizes="32x32" href="/static/icons/icon-96x96.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/static/icons/icon-72x72.png">
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{% block title %}AgriMarché — Du champ à votre porte{% endblock %}</title>
@@ -112,5 +132,18 @@
 
 <script src="{% static 'js/main.js' %}"></script>
 {% include 'partials/_chatbot.html' %}
+<!-- Indicateur hors ligne -->
+<div id="connexion-status" style="
+  display:none; position:fixed; top:0; left:0; right:0;
+  background:#FF5500; color:white; padding:10px 20px;
+  text-align:center; font-size:13px; font-weight:600;
+  z-index:9998; align-items:center; justify-content:center; gap:8px;
+">
+  <span>📡</span>
+  <span>Vous êtes hors ligne — certaines fonctionnalités sont limitées</span>
+</div>
+
+<!-- Service Worker + PWA -->
+<script src="{% static 'js/pwa.js' %}"></script>
 </body>
 </html>

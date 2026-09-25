@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hors ligne — AgriMarché</title>
+  {% load static %}
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0B1F0E;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+      text-align: center;
+    }
+    .container { max-width: 360px; }
+    .logo { font-size: 80px; margin-bottom: 24px; animation: pulse 2s infinite; }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.8; }
+    }
+    h1 { font-size: 26px; font-weight: 800; color: #7AE600; margin-bottom: 12px; }
+    p { color: rgba(255,255,255,0.6); font-size: 15px; line-height: 1.6; margin-bottom: 32px; }
+    .btn {
+      background: #7AE600;
+      color: #0B1F0E;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-block;
+      text-decoration: none;
+      margin: 6px;
+      transition: transform .15s;
+    }
+    .btn:hover { transform: scale(1.03); }
+    .btn-ghost {
+      background: transparent;
+      color: rgba(255,255,255,0.6);
+      border: 1.5px solid rgba(255,255,255,0.2);
+    }
+    .status {
+      margin-top: 32px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.3);
+    }
+    .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #FF5500;
+      display: inline-block;
+      margin-right: 6px;
+      animation: blink 1.5s infinite;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">🌿</div>
+    <h1>Vous êtes hors ligne</h1>
+    <p>
+      La connexion internet est nécessaire pour accéder à AgriMarché.<br>
+      Vérifiez votre réseau et réessayez.
+    </p>
+    <button class="btn" onclick="tenterReconnexion()">
+      ↻ Réessayer
+    </button>
+    <br>
+    <a href="/" class="btn btn-ghost">← Retour à l'accueil</a>
+
+    <div class="status">
+      <span class="dot" id="dot"></span>
+      <span id="status-text">Hors ligne</span>
+    </div>
+  </div>
+
+  <script>
+    // Détecter quand la connexion revient
+    window.addEventListener('online', function() {
+      document.getElementById('dot').style.background = '#7AE600';
+      document.getElementById('status-text').textContent = 'Connexion rétablie — rechargement...';
+      setTimeout(function() { location.reload(); }, 1500);
+    });
+
+    window.addEventListener('offline', function() {
+      document.getElementById('dot').style.background = '#FF5500';
+      document.getElementById('status-text').textContent = 'Hors ligne';
+    });
+
+    function tenterReconnexion() {
+      if (navigator.onLine) {
+        location.reload();
+      } else {
+        document.getElementById('status-text').textContent = 'Toujours hors ligne...';
+      }
+    }
+
+    // Vérifier périodiquement
+    setInterval(function() {
+      if (navigator.onLine) {
+        document.getElementById('dot').style.background = '#7AE600';
+        document.getElementById('status-text').textContent = 'Connexion rétablie — rechargement...';
+        setTimeout(function() { location.reload(); }, 1000);
+      }
+    }, 3000);
+  </script>
+</body>
+</html>
