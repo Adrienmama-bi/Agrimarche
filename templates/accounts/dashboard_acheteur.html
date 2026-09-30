@@ -31,41 +31,41 @@
     <nav class="sidebar-nav">
       <span class="sidebar-section-label">Principal</span>
       <a href="{% url 'dashboard_acheteur' %}" class="sidebar-link is-active">
-        <span class="icon">🏠</span> Tableau de bord
+        <span class="icon"></span> Tableau de bord
       </a>
       <a href="{% url 'catalogue' %}" class="sidebar-link">
-        <span class="icon">🛒</span> Catalogue
+        <span class="icon"></span> Catalogue
       </a>
       <a href="{% url 'mes_commandes' %}" class="sidebar-link">
-        <span class="icon">📦</span> Mes commandes
+        <span class="icon"></span> Mes commandes
         {% if en_livraison %}<span class="badge">{{ en_livraison }}</span>{% endif %}
       </a>
       <a href="{% url 'mes_commandes' %}" class="sidebar-link">
-        <span class="icon">📍</span> Suivi livraison
+        <span class="icon"></span> Suivi livraison
       </a>
       <a href="{% url 'carte_catalogue' %}" class="sidebar-link">
-  <span class="icon">🗺️</span> Carte des produits
+  <span class="icon"></span> Carte des produits
 </a>
 <a href="{% url 'produits_proches' %}" class="sidebar-link">
-  <span class="icon">📍</span> Produits proches
+  <span class="icon"></span> Produits proches
 </a>
     
       <span class="sidebar-section-label" style="margin-top:var(--sp-3);">Compte</span>
       <a href="{% url 'mon_profil' %}" class="sidebar-link">
-  <span class="icon">👤</span> Mon profil
+  <span class="icon"></span> Mon profil
 </a>
   <a href="{% url 'mes_paiements' %}" class="sidebar-link">
-        <span class="icon">💳</span> Paiements
+        <span class="icon"></span> Paiements
       </a>
       <a href="{% url 'boite_reception'%}" class="sidebar-link">
-        <span class="icon">💬</span> Messagerie
+        <span class="icon"></span> Messagerie
       </a>
      
     </nav>
 
     <div class="sidebar-bottom">
       <a href="{% url 'deconnexion' %}" class="sidebar-logout">
-        <span class="icon">🚪</span> Déconnexion
+        <span class="icon"></span> Déconnexion
       </a>
     </div>
   </aside>
@@ -76,7 +76,7 @@
     <!-- TOPBAR -->
     <div class="dash-topbar">
       <div>
-        <div class="dash-topbar-title">Bonjour, {{ request.user.first_name }} 👋</div>
+        <div class="dash-topbar-title">Bonjour, {{ request.user.first_name }} </div>
         <div style="font-size:12px; color:var(--ink-faint); margin-top:2px;">Bienvenue sur votre espace acheteur</div>
       </div>
       <div class="dash-topbar-right">
@@ -98,24 +98,24 @@
           <span class="stat-card-label">Total commandes</span>
           <div class="stat-card-value">{{ total_commandes }}</div>
           <div class="stat-card-sub">Depuis votre inscription</div>
-          <span class="stat-card-icon">📦</span>
+          <span class="stat-card-icon"></span>
         </div>
         <div class="stat-card stat-lemon">
           <span class="stat-card-label">En livraison</span>
           <div class="stat-card-value">{{ en_livraison }}</div>
           <div class="stat-card-sub">Commandes en cours</div>
-          <span class="stat-card-icon">🚚</span>
+          <span class="stat-card-icon"></span>
         </div>
         <div class="stat-card stat-green">
           <span class="stat-card-label">Livrées</span>
           <div class="stat-card-value">{{ total_livrees|default:"0" }}</div>
           <div class="stat-card-sub">Commandes reçues</div>
-          <span class="stat-card-icon">✅</span>
+          <span class="stat-card-icon"></span>
         </div>
         <div class="stat-card stat-blue">
           <span class="stat-card-label">Adresse livraison</span>
           <div style="font-size:14px; font-weight:600; color:var(--soil); margin-top:var(--sp-2);">{{ profil.adresse_livraison|default:"Non définie" }}</div>
-          <span class="stat-card-icon">📍</span>
+          <span class="stat-card-icon"></span>
         </div>
       </div>
 
@@ -166,7 +166,7 @@
             <tr>
               <td colspan="6">
                 <div class="empty-table">
-                  <span class="empty-icon">🛒</span>
+                  <span class="empty-icon"></span>
                   Vous n'avez pas encore passé de commande.
                   <a href="#" style="color:var(--acheteur-dark); font-weight:700; display:block; margin-top:var(--sp-3);">Explorer le catalogue →</a>
                 </div>
@@ -181,7 +181,7 @@
       {% if recommandations %}
       <div style="margin-top:var(--sp-6);">
         <div style="display:flex; align-items:center; gap:var(--sp-2); margin-bottom:var(--sp-4);">
-          <h2 style="font-size:18px; margin:0;">✨ Recommandé pour vous</h2>
+          <h2 style="font-size:18px; margin:0;"> Recommandé pour vous</h2>
           <span style="font-family:var(--font-mono); font-size:9px; letter-spacing:0.1em; text-transform:uppercase; background:var(--lemon-soft); color:var(--lemon-dark); padding:2px 8px; border-radius:var(--r-full);">IA</span>
         </div>
         <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(220px,1fr)); gap:var(--sp-4);">
@@ -190,7 +190,7 @@
             <div class="produce-media">
               {% with photo=produit.photos.first %}
                 {% if photo %}<img src="{{ photo.image.url }}" alt="{{ produit.nom }}">
-                {% else %}<div class="produce-placeholder">🌿</div>{% endif %}
+                {% else %}<div class="produce-placeholder"></div>{% endif %}
               {% endwith %}
               {% if produit.est_bio %}<span class="badge-bio">BIO</span>{% endif %}
             </div>
@@ -198,7 +198,7 @@
               <h3 class="produce-name" style="font-size:15px;">{{ produit.nom }}</h3>
               <p class="produce-price" style="margin-bottom:var(--sp-2);"><span class="mono">{{ produit.prix_unitaire }} FCFA</span> / {{ produit.get_unite_display }}</p>
               {% if raison %}
-              <div style="font-size:11px; color:var(--lemon-dark); font-style:italic;">✨ {{ raison }}</div>
+              <div style="font-size:11px; color:var(--lemon-dark); font-style:italic;"> {{ raison }}</div>
               {% endif %}
             </div>
           </a>

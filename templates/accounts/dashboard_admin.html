@@ -30,44 +30,44 @@
     <nav class="sidebar-nav">
       <span class="sidebar-section-label">Administration</span>
       <a href="{% url 'dashboard_admin' %}" class="sidebar-link is-active">
-        <span class="icon">🏠</span> Tableau de bord
+        <span class="icon"></span> Tableau de bord
       </a>
       <a href="{% url 'gestion_utilisateurs' %}" class="sidebar-link">
-        <span class="icon">👥</span> Utilisateurs
+        <span class="icon"></span> Utilisateurs
         <span class="badge">{{ total_users }}</span>
       </a>
       <a href="{% url 'moderation_produits' %}" class="sidebar-link">
-        <span class="icon">🌿</span> Modération produits
+        <span class="icon"></span> Modération produits
         {% if produits_en_attente %}<span class="badge">{{ produits_en_attente }}</span>{% endif %}
       </a>
       <a href="#" class="sidebar-link">
-        <span class="icon">📦</span> Commandes
+        <span class="icon"></span> Commandes
       </a>
       <a href="#" class="sidebar-link">
-        <span class="icon">🚚</span> Livraisons
+        <span class="icon"></span> Livraisons
       </a>
       <a href="/admin/paiements/paiement/" class="sidebar-link">
-        <span class="icon">💳</span> Paiements
+        <span class="icon"></span> Paiements
       </a>
 
       <span class="sidebar-section-label" style="margin-top:var(--sp-3);">Outils</span>
       <a href="#" class="sidebar-link">
-        <span class="icon">📊</span> Rapports
+        <span class="icon"></span> Rapports
       </a>
       <a href="{% url 'agriculteurs_inactifs' %}" class="sidebar-link">
-  <span class="icon">😴</span> Agriculteurs inactifs
+  <span class="icon"></span> Agriculteurs inactifs
 </a>
 <a href="{% url 'demande_categorie' %}" class="sidebar-link">
-  <span class="icon">📊</span> Prévisions marché
+  <span class="icon"></span> Prévisions marché
 </a>
       <a href="/admin/" class="sidebar-link">
-        <span class="icon">🔧</span> Admin Django
+        <span class="icon"></span> Admin Django
       </a>
     </nav>
 
     <div class="sidebar-bottom">
       <a href="{% url 'deconnexion' %}" class="sidebar-logout">
-        <span class="icon">🚪</span> Déconnexion
+        <span class="icon"></span> Déconnexion
       </a>
     </div>
   </aside>
@@ -88,7 +88,7 @@
 </a>
         {% if produits_en_attente %}
         <a href="{% url 'moderation_produits' %}" class="btn btn-lemon" style="padding:10px 20px; font-size:14px;">
-          🌿 {{ produits_en_attente }} produit{% if produits_en_attente > 1 %}s{% endif %} à valider
+           {{ produits_en_attente }} produit{% if produits_en_attente > 1 %}s{% endif %} à valider
         </a>
         {% endif %}
       </div>
@@ -101,25 +101,25 @@
           <span class="stat-card-label">Utilisateurs</span>
           <div class="stat-card-value">{{ total_users }}</div>
           <div class="stat-card-sub">Inscrits sur la plateforme</div>
-          <span class="stat-card-icon">👥</span>
+          <span class="stat-card-icon"></span>
         </div>
         <div class="stat-card stat-green">
           <span class="stat-card-label">Produits</span>
           <div class="stat-card-value">{{ total_produits }}</div>
           <div class="stat-card-sub">{{ produits_en_attente }} en attente</div>
-          <span class="stat-card-icon">🌿</span>
+          <span class="stat-card-icon"></span>
         </div>
         <div class="stat-card stat-orange">
           <span class="stat-card-label">Commandes</span>
           <div class="stat-card-value">{{ total_commandes }}</div>
           <div class="stat-card-sub">Total des commandes</div>
-          <span class="stat-card-icon">📦</span>
+          <span class="stat-card-icon"></span>
         </div>
         <div class="stat-card stat-blue">
           <span class="stat-card-label">Livraisons</span>
           <div class="stat-card-value">{{ total_livraisons }}</div>
           <div class="stat-card-sub">En cours actuellement</div>
-          <span class="stat-card-icon">🚚</span>
+          <span class="stat-card-icon"></span>
         </div>
       </div>
 
@@ -128,7 +128,7 @@
         <!-- PRODUITS À VALIDER -->
         <div class="dash-card">
           <div class="dash-card-head">
-            <span class="dash-card-title">🌿 Produits en attente de validation</span>
+            <span class="dash-card-title"> Produits en attente de validation</span>
             <a href="{% url 'moderation_produits' %}" class="dash-card-link">Voir tout →</a>
           </div>
           <table class="dash-table">
@@ -168,7 +168,7 @@
               <tr>
                 <td colspan="4">
                   <div class="empty-table">
-                    <span class="empty-icon">✅</span>
+                    <span class="empty-icon"></span>
                     Aucun produit en attente. Tout est à jour !
                   </div>
                 </td>

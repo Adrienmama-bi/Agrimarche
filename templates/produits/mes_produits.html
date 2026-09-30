@@ -30,22 +30,22 @@
     <nav class="sidebar-nav">
       <span class="sidebar-section-label">Principal</span>
       <a href="{% url 'dashboard_agriculteur' %}" class="sidebar-link">
-        <span class="icon">🏠</span> Tableau de bord
+        <span class="icon"></span> Tableau de bord
       </a>
       <a href="{% url 'publier_produit' %}" class="sidebar-link">
-        <span class="icon">➕</span> Publier un produit
+        <span class="icon"></span> Publier un produit
       </a>
       <a href="{% url 'mes_produits' %}" class="sidebar-link is-active">
-        <span class="icon">🌿</span> Mes produits
+        <span class="icon"></span> Mes produits
       </a>
       <a href="#" class="sidebar-link">
-        <span class="icon">📥</span> Commandes reçues
+        <span class="icon"></span> Commandes reçues
       </a>
     </nav>
 
     <div class="sidebar-bottom">
       <a href="{% url 'deconnexion' %}" class="sidebar-logout">
-        <span class="icon">🚪</span> Déconnexion
+        <span class="icon"></span> Déconnexion
       </a>
     </div>
   </aside>
@@ -95,7 +95,7 @@
                   {% endwith %}
                   <div>
                     <div style="font-weight:600; font-size:14px;">{{ produit.nom }}</div>
-                    <div style="font-size:12px; color:var(--ink-faint);">📍 {{ produit.localisation }}</div>
+                    <div style="font-size:12px; color:var(--ink-faint);"> {{ produit.localisation }}</div>
                   </div>
                 </div>
               </td>
@@ -104,7 +104,7 @@
               </td>
               <td>
                 <span style="font-family:var(--font-mono); font-weight:700; font-size:13px;">
-                  {{ produit.prix_unitaire }} CDF
+                  {{ produit.prix_unitaire }} FCFA
                 </span>
                 <div style="font-size:11px; color:var(--ink-faint);">/ {{ produit.get_unite_display }}</div>
               </td>
@@ -112,7 +112,7 @@
                 {{ produit.quantite_disponible }} {{ produit.get_unite_display }}
               </td>
               <td style="font-family:var(--font-mono); font-size:13px; color:var(--ink-soft);">
-                👁️ {{ produit.nombre_vues }}
+                 {{ produit.nombre_vues }}
               </td>
               <td>
                 <span class="status-badge

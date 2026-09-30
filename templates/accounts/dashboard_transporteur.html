@@ -30,42 +30,42 @@
     <nav class="sidebar-nav">
       <span class="sidebar-section-label">Principal</span>
       <a href="{% url 'dashboard_transporteur' %}" class="sidebar-link is-active">
-        <span class="icon">🏠</span> Tableau de bord
+        <span class="icon"></span> Tableau de bord
       </a>
      <a href="{% url 'missions_disponibles' %}" class="sidebar-link">
-       <span class="icon">📋</span> Missions disponibles
+       <span class="icon"></span> Missions disponibles
      </a>
      <a href="{% url 'mes_livraisons' %}" class="sidebar-link">
-       <span class="icon">🚚</span> Mes livraisons
+       <span class="icon"></span> Mes livraisons
      </a>
       <a href="{% url 'mes_livraisons' %}" class="sidebar-link">
-        <span class="icon">📅</span> Mon planning
+        <span class="icon"></span> Mon planning
       </a>
 
       <span class="sidebar-section-label" style="margin-top:var(--sp-3);">Compte</span>
       <a href="{% url 'mon_profil' %}" class="sidebar-link">
-  <span class="icon">👤</span> Mon profil
+  <span class="icon"></span> Mon profil
 </a>
       <a href="{% url 'gestion_vehicules' %}" class="sidebar-link">
-  <span class="icon">🚛</span> Mon véhicule
+  <span class="icon"></span> Mon véhicule
 </a>
          <a href="{% url 'boite_reception'%}" class="sidebar-link">
-        <span class="icon">💬</span> Messagerie
+        <span class="icon"></span> Messagerie
       </a>
       <a href="{% url 'itineraire_optimal' %}" class="sidebar-link">
-  <span class="icon">🗺️</span> Itinéraire optimal
+  <span class="icon"></span> Itinéraire optimal
 </a>
       <a href="{% url 'dashboard_transporteur' %}" class="sidebar-link">
-        <span class="icon">💰</span> Mes revenus
+        <span class="icon"></span> Mes revenus
       </a>
      <a href="{% url 'mes_avis' %}" class="sidebar-link">
-  <span class="icon">⭐</span> Mes avis
+  <span class="icon"></span> Mes avis
 </a>
     </nav>
 
     <div class="sidebar-bottom">
       <a href="{% url 'deconnexion' %}" class="sidebar-logout">
-        <span class="icon">🚪</span> Déconnexion
+        <span class="icon"></span> Déconnexion
       </a>
     </div>
   </aside>
@@ -101,19 +101,19 @@
           <span class="stat-card-label">Total missions</span>
           <div class="stat-card-value">{{ total_missions }}</div>
           <div class="stat-card-sub">Depuis votre inscription</div>
-          <span class="stat-card-icon">🚚</span>
+          <span class="stat-card-icon"></span>
         </div>
         <div class="stat-card stat-lemon">
           <span class="stat-card-label">Missions actives</span>
           <div class="stat-card-value">{{ missions_actives }}</div>
           <div class="stat-card-sub">En cours maintenant</div>
-          <span class="stat-card-icon">📍</span>
+          <span class="stat-card-icon"></span>
         </div>
         <div class="stat-card stat-green">
           <span class="stat-card-label">Revenus totaux</span>
           <div class="stat-card-value" style="font-size:26px;">{{ revenus }}</div>
-          <div class="stat-card-sub">CDF gagnés</div>
-          <span class="stat-card-icon">💰</span>
+          <div class="stat-card-sub">FCFA gagnés</div>
+          <span class="stat-card-icon"></span>
         </div>
         <div class="stat-card stat-orange">
           <span class="stat-card-label">Note moyenne</span>
@@ -155,7 +155,7 @@
             <tr>
               <td colspan="6">
                 <div class="empty-table">
-                  <span class="empty-icon">🚚</span>
+                  <span class="empty-icon"></span>
                   Aucune mission pour l'instant.
                   <a href="#" style="color:var(--transporteur-dark); font-weight:700; display:block; margin-top:var(--sp-2);">Voir les missions disponibles →</a>
                 </div>

@@ -71,7 +71,7 @@
             <div class="filter-title">Options</div>
             <label class="filter-option">
               <input type="checkbox" name="bio" value="1" {% if request.GET.bio %}checked{% endif %}>
-              <span>🌿 Produits bio uniquement</span>
+              <span> Produits bio uniquement</span>
             </label>
           </div>
 
@@ -104,7 +104,7 @@
                   {% if photo %}
                     <img src="{{ photo.image.url }}" alt="{{ produit.nom }}">
                   {% else %}
-                    <div class="produce-placeholder">🌿</div>
+                    <div class="produce-placeholder"></div>
                   {% endif %}
                 {% endwith %}
                 {% if produit.est_bio %}<span class="badge-bio">BIO</span>{% endif %}
@@ -112,7 +112,7 @@
             </a>
             <div class="produce-body">
               <p class="produce-farmer">
-                🌾 {{ produit.agriculteur.utilisateur.get_full_name }}
+                 {{ produit.agriculteur.utilisateur.get_full_name }}
                 {% if produit.agriculteur.est_verifie %}
                   <span style="color:var(--lemon-dark); font-size:11px;">✓ Vérifié</span>
                 {% endif %}
@@ -126,7 +126,7 @@
               <div style="display:flex; align-items:center; justify-content:space-between; margin-top:var(--sp-3);">
                 <div>
                   <span class="produce-price">
-                    <span class="mono">{{ produit.prix_unitaire }} CDF</span> / {{ produit.get_unite_display }}
+                    <span class="mono">{{ produit.prix_unitaire }} FCFA</span> / {{ produit.get_unite_display }}
                   </span>
                   <div style="font-size:11px; color:var(--ink-faint); margin-top:2px;">
                     Stock : {{ produit.quantite_disponible }} {{ produit.get_unite_display }}
@@ -140,7 +140,7 @@
           </article>
           {% empty %}
           <div class="empty-state" style="grid-column:1/-1;">
-            <span style="font-size:48px; display:block; margin-bottom:var(--sp-4);">🌱</span>
+            <span style="font-size:48px; display:block; margin-bottom:var(--sp-4);"></span>
             Aucun produit trouvé pour ces critères.
             <a href="{% url 'catalogue' %}" style="color:var(--lemon-dark); font-weight:700; display:block; margin-top:var(--sp-3);">
               Voir tous les produits →

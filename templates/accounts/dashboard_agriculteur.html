@@ -31,46 +31,46 @@
     <nav class="sidebar-nav">
       <span class="sidebar-section-label">Principal</span>
       <a href="{% url 'dashboard_agriculteur' %}" class="sidebar-link is-active">
-        <span class="icon">🏠</span> Tableau de bord
+        <span class="icon"></span> Tableau de bord
       </a>
       <a href="{% url 'mes_produits' %}" class="sidebar-link">
-        <span class="icon">🌿</span> Mes produits
+        <span class="icon"></span> Mes produits
       </a>
       <a href="{% url 'commandes_recues' %}" class="sidebar-link">
-        <span class="icon">📥</span> Commandes reçues
+        <span class="icon"></span> Commandes reçues
         {% if total_commandes %}<span class="badge">{{ total_commandes }}</span>{% endif %}
       </a>
       <a href="{% url 'commandes_recues' %}" class="sidebar-link">
-        <span class="icon">🚚</span> Mes livraisons
+        <span class="icon"></span> Mes livraisons
       </a>
 
       <span class="sidebar-section-label" style="margin-top:var(--sp-3);">Compte</span>
       <a href="{% url 'mon_profil' %}" class="sidebar-link">
-  <span class="icon">👤</span> Mon profil
+  <span class="icon"></span> Mon profil
 </a>
       <a href="{% url 'mes_paiements' %}" class="sidebar-link">
-        <span class="icon">💰</span> Mes revenus
+        <span class="icon"></span> Mes revenus
       </a>
       <a href="{% url 'prediction_revenus' %}" class="sidebar-link">
-  <span class="icon">📈</span> Prédiction revenus
+  <span class="icon"></span> Prédiction revenus
 </a>
 <a href="{% url 'demande_categorie' %}" class="sidebar-link">
-  <span class="icon">📊</span> Demande marché
+  <span class="icon"></span> Demande marché
 </a>
       <a href="{% url 'boite_reception'%}" class="sidebar-link">
-        <span class="icon">💬</span> Messagerie
+        <span class="icon"></span> Messagerie
       </a>
       <a href="{% url 'carte_catalogue' %}" class="sidebar-link">
-  <span class="icon">🗺️</span> Carte du marché
+  <span class="icon"></span> Carte du marché
 </a>
       <a href="{% url 'mes_avis' %}" class="sidebar-link">
-  <span class="icon">⭐</span> Mes avis
+  <span class="icon"></span> Mes avis
 </a>
     </nav>
 
     <div class="sidebar-bottom">
       <a href="{% url 'deconnexion' %}" class="sidebar-logout">
-        <span class="icon">🚪</span> Déconnexion
+        <span class="icon"></span> Déconnexion
       </a>
     </div>
   </aside>
@@ -80,7 +80,7 @@
 
     <div class="dash-topbar">
       <div>
-        <div class="dash-topbar-title">Bonjour, {{ request.user.first_name }} 👋</div>
+        <div class="dash-topbar-title">Bonjour, {{ request.user.first_name }} </div>
         <div style="font-size:12px; color:var(--ink-faint); margin-top:2px;">{{ profil.exploitation }} — {{ profil.localisation }}</div>
       </div>
       <div class="dash-topbar-right">
@@ -107,12 +107,12 @@
           <span class="stat-card-label">Commandes reçues</span>
           <div class="stat-card-value">{{ total_commandes }}</div>
           <div class="stat-card-sub">Total cumulé</div>
-          <span class="stat-card-icon">📥</span>
+          <span class="stat-card-icon"></span>
         </div>
         <div class="stat-card stat-blue">
           <span class="stat-card-label">Revenus totaux</span>
           <div class="stat-card-value" style="font-size:26px;">{{ revenus }}</div>
-          <div class="stat-card-sub">CDF encaissés</div>
+          <div class="stat-card-sub">FCFA encaissés</div>
           <span class="stat-card-icon">💰</span>
         </div>
         <div class="stat-card stat-orange">
@@ -161,7 +161,7 @@
               <tr>
                 <td colspan="4">
                   <div class="empty-table">
-                    <span class="empty-icon">🌱</span>
+                    <span class="empty-icon"></span>
                     Aucun produit publié.
                     <a href="#" style="color:var(--lemon-dark); font-weight:700; display:block; margin-top:var(--sp-2);">Publier votre première annonce →</a>
                   </div>
@@ -208,7 +208,7 @@
               <tr>
                 <td colspan="4">
                   <div class="empty-table">
-                    <span class="empty-icon">📥</span>
+                    <span class="empty-icon"></span>
                     Aucune commande reçue.
                   </div>
                 </td>

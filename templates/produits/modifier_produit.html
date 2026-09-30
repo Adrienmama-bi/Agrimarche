@@ -30,10 +30,10 @@
     <nav class="sidebar-nav">
       <span class="sidebar-section-label">Principal</span>
       <a href="{% url 'dashboard_agriculteur' %}" class="sidebar-link">
-        <span class="icon">🏠</span> Tableau de bord
+        <span class="icon"></span> Tableau de bord
       </a>
       <a href="{% url 'publier_produit' %}" class="sidebar-link">
-        <span class="icon">➕</span> Publier un produit
+        <span class="icon"></span> Publier un produit
       </a>
       <a href="{% url 'mes_produits' %}" class="sidebar-link is-active">
         <span class="icon">🌿</span> Mes produits
@@ -42,7 +42,7 @@
 
     <div class="sidebar-bottom">
       <a href="{% url 'deconnexion' %}" class="sidebar-logout">
-        <span class="icon">🚪</span> Déconnexion
+        <span class="icon"></span> Déconnexion
       </a>
     </div>
   </aside>
@@ -98,7 +98,7 @@
                 </div>
                 <label style="display:flex; align-items:center; gap:var(--sp-2); font-size:14px; cursor:pointer;">
                   <input type="checkbox" name="est_bio" {% if form.est_bio.value %}checked{% endif %} style="accent-color:var(--lemon); width:16px; height:16px;">
-                  <span>🌿 Produit bio</span>
+                  <span> Produit bio</span>
                 </label>
               </div>
             </div>
@@ -129,7 +129,7 @@
               </div>
               <div style="padding:var(--sp-5);">
                 <div class="field">
-                  <label>Prix unitaire (CDF)</label>
+                  <label>Prix unitaire (FCFA)</label>
                   <input type="number" name="prix_unitaire" class="input" value="{{ form.prix_unitaire.value|default:'' }}" step="0.01">
                 </div>
                 <div class="field">
